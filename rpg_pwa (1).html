@@ -1,0 +1,3186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <!-- 모바일 환경 강제 고정 및 노치 디자인 최적화 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Life RPG">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Life RPG: 갓생 용사의 광장 ⚔️</title>
+  
+  <!-- PWA manifest 및 구동 연결 -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- 구글 폰트 및 한국어 대표 픽셀 폰트 '네오둥근모' 연결 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105@1.1/NeoDunggeunmo.css">
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <!-- PWA favicon 및 홈화면 아이콘 연결 -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><rect x='3' y='1' width='2' height='5' fill='%23d4a017'/><rect x='2' y='5' width='4' height='1' fill='%238a6610'/><rect x='3' y='6' width='2' height='1' fill='%23c0392b'/></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><rect x='3' y='1' width='2' height='5' fill='%23d4a017'/><rect x='2' y='5' width='4' height='1' fill='%238a6610'/><rect x='3' y='6' width='2' height='1' fill='%23c0392b'/></svg>">
+  
+  <style>
+    :root {
+      --bg-deepest: #07080b;
+      --bg-dark: #0a0d14;
+      --bg-panel: #111422;
+      --bg-card: #181c2f;
+      --border-medieval: #8a6610;
+      --border-medieval-glow: #d4a017;
+      --amber: #d4a017;
+      --amber-light: #f5c842;
+      --amber-dim: #8a6610;
+      --emerald: #2ecc71;
+      --emerald-dim: #1a7a44;
+      --crimson: #c0392b;
+      --purple: #9b59b6;
+      --text-primary: #f0e6d2;
+      --text-secondary: #9aa3bf;
+      --text-dim: #5a6480;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'NeoDunggeunmo', 'MedievalSharp', serif;
+      background: var(--bg-deepest);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      overscroll-behavior: none;
+      touch-action: manipulation;
+    }
+
+    input, select, button, textarea {
+      font-family: 'NeoDunggeunmo', inherit;
+    }
+
+    /* 전체 모바일 종횡비 컴팩트 레이아웃 */
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--bg-dark);
+      border-left: 2px solid var(--bg-panel);
+      border-right: 2px solid var(--bg-panel);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      overflow: hidden;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* ===== STATUS HUD ===== */
+    #status-hud {
+      background: linear-gradient(180deg, #05060a 0%, #101322 100%);
+      border-bottom: 2px solid var(--border-medieval);
+      padding: 12px 16px 10px;
+      z-index: 10;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    .hud-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .hero-title {
+      font-family: 'NeoDunggeunmo', 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--amber-light);
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(212, 160, 23, 0.4);
+    }
+
+    .gold-purse {
+      font-family: 'NeoDunggeunmo', 'Cinzel', serif;
+      font-size: 13px;
+      color: var(--amber-light);
+      font-weight: 600;
+      background: rgba(212, 160, 23, 0.15);
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(212, 160, 23, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .xp-hud-container {
+      margin-top: 4px;
+    }
+
+    .xp-details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    .xp-track {
+      height: 10px;
+      background: #06080e;
+      border: 1px solid var(--border-medieval);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7a5010, var(--amber), var(--amber-light));
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* ===== TOWN SCENE VIEWPORT ===== */
+    #game-viewport {
+      flex: 1;
+      position: relative;
+      background: #0d1020;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #town-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+
+    .quick-specs {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .spec-pill {
+      background: rgba(10, 13, 20, 0.85);
+      border: 1px solid var(--border-medieval);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Plaza Side Buttons for Closet / Inventory / Account */
+    .plaza-side-controls {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 5;
+    }
+
+    .plaza-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(17, 20, 34, 0.9);
+      border: 2px solid var(--border-medieval);
+      color: var(--amber-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+      transition: all 0.2s ease;
+    }
+
+    .plaza-btn:active {
+      transform: scale(0.9);
+      border-color: var(--amber-light);
+      background: var(--bg-card);
+    }
+
+    /* ===== GAME MENU POPUP ===== */
+    .game-window {
+      position: absolute;
+      inset: 12px 12px 12px 12px;
+      background: rgba(10, 13, 22, 0.97);
+      border: 3px double var(--border-medieval);
+      border-radius: 8px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 25px rgba(0,0,0,0.95);
+      transform: translateY(30px) scale(0.95);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .game-window.active {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .window-header {
+      background: linear-gradient(180deg, #1b2033 0%, #101322 100%);
+      border-bottom: 2px solid var(--border-medieval);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 5px 5px 0 0;
+    }
+
+    .window-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--amber);
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-close-win {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    .btn-close-win:hover { color: var(--crimson); }
+
+    .window-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+    }
+
+    .window-content::-webkit-scrollbar { width: 4px; }
+    .window-content::-webkit-scrollbar-track { background: transparent; }
+    .window-content::-webkit-scrollbar-thumb { background: var(--border-medieval-glow); border-radius: 2px; }
+
+    .section-header {
+      font-size: 12px;
+      color: var(--amber);
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(138, 102, 16, 0.3);
+      padding-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-action-sm {
+      background: rgba(212, 160, 23, 0.15);
+      border: 1px solid var(--border-medieval);
+      color: var(--amber-light);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .btn-action-sm:hover {
+      background: rgba(212, 160, 23, 0.3);
+      border-color: var(--border-medieval-glow);
+    }
+
+    .sliding-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border-medieval);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .sliding-form.active { display: block; }
+
+    .form-group { margin-bottom: 8px; }
+    .form-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    .game-input {
+      width: 100%;
+      background: #080a10;
+      border: 1px solid var(--border-medieval);
+      border-radius: 4px;
+      padding: 8px;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .game-input:focus { border-color: var(--border-medieval-glow); }
+
+    .game-select {
+      width: 100%;
+      background: #080a10;
+      border: 1px solid var(--border-medieval);
+      border-radius: 4px;
+      padding: 8px;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .difficulty-grid {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-diff {
+      flex: 1;
+      padding: 6px;
+      border: 1px solid var(--border-medieval);
+      background: #080a10;
+      color: var(--text-secondary);
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-diff.selected-low { border-color: var(--emerald); color: var(--emerald); background: rgba(46, 204, 113, 0.1); }
+    .btn-diff.selected-mid { border-color: var(--amber); color: var(--amber); background: rgba(212, 160, 23, 0.1); }
+    .btn-diff.selected-high { border-color: var(--crimson); color: var(--crimson); background: rgba(192, 57, 43, 0.1); }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(180deg, var(--amber-dim) 0%, #563e05 100%);
+      border: 1px solid var(--border-medieval);
+      color: var(--text-primary);
+      padding: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    /* ===== QUEST, SHOP, & BAG CARDS ===== */
+    .game-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-medieval);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .game-card.main-card { border-color: var(--purple); }
+    .game-card.main-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0; width: 4px;
+      background: var(--purple);
+    }
+
+    .game-card.completed { opacity: 0.55; }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .card-name {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+
+    .card-badges {
+      display: flex;
+      gap: 4px;
+      margin-top: 2px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 9px;
+      padding: 2px 5px;
+      border-radius: 3px;
+      border: 1px solid;
+    }
+
+    .b-low { background: rgba(46, 204, 113, 0.1); color: var(--emerald); border-color: rgba(46, 204, 113, 0.3); }
+    .b-mid { background: rgba(212, 160, 23, 0.1); color: var(--amber); border-color: rgba(212, 160, 23, 0.3); }
+    .b-high { background: rgba(192, 57, 43, 0.1); color: var(--crimson); border-color: rgba(192, 57, 43, 0.3); }
+    .b-link { background: rgba(155, 89, 182, 0.1); color: var(--purple); border-color: rgba(155, 89, 182, 0.3); }
+
+    .card-reward {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .card-reward span { color: var(--amber-light); }
+
+    .progress-bar-wrap {
+      margin-top: 8px;
+    }
+    .progress-desc {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+    .progress-track {
+      height: 6px;
+      background: #080a10;
+      border: 1px solid var(--border-medieval);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), #d2b4de);
+      width: 0%;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .btn-card-complete {
+      flex: 1;
+      padding: 6px;
+      font-size: 11px;
+      border-radius: 4px;
+      border: 1px solid;
+      cursor: pointer;
+    }
+
+    .btn-card-normal {
+      background: rgba(46, 204, 113, 0.15);
+      border-color: var(--emerald);
+      color: var(--emerald);
+    }
+    .btn-card-great {
+      background: rgba(212, 160, 23, 0.15);
+      border-color: var(--amber);
+      color: var(--amber-light);
+    }
+    .btn-card-del {
+      background: transparent;
+      border: 1px solid rgba(192, 57, 43, 0.3);
+      color: var(--crimson);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-stamp {
+      text-align: center;
+      padding: 6px;
+      font-size: 11px;
+      font-style: italic;
+      color: var(--emerald);
+      background: rgba(46, 204, 113, 0.05);
+      border-radius: 4px;
+      margin-top: 6px;
+    }
+
+    /* ===== INVENTORY & SHOP ===== */
+    .shop-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .shop-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-medieval);
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .shop-icon-wrapper {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shop-info { flex: 1; }
+    .shop-name {
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .shop-desc { font-size: 10px; color: var(--text-secondary); }
+
+    .btn-shop-action {
+      background: rgba(212, 160, 23, 0.15);
+      border: 1px solid var(--border-medieval);
+      color: var(--amber-light);
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-shop-action.equipped {
+      background: rgba(46, 204, 113, 0.15);
+      border-color: var(--emerald);
+      color: var(--emerald);
+      cursor: default;
+    }
+
+    /* ===== GAME FOOTER NAV ===== */
+    #bottom-menu-bar {
+      background: linear-gradient(0deg, #05060a 0%, #101322 100%);
+      border-top: 2px solid var(--border-medieval);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      z-index: 10;
+      position: relative;
+    }
+
+    .nav-button {
+      flex: 1;
+      height: 100%;
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .nav-button span {
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-button:hover, .nav-button.active {
+      color: var(--amber-light);
+    }
+
+    /* ===== ALERTS & NOTIFICATIONS ===== */
+    #notif-toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 13, 20, 0.95);
+      border: 2px solid var(--border-medieval);
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 12px;
+      color: var(--amber-light);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+      z-index: 1000;
+      display: none;
+      text-align: center;
+      width: 85%;
+      max-width: 400px;
+    }
+
+    /* ===== LEVEL UP MODAL ===== */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-box {
+      background: #0f1322;
+      border: 3px double var(--border-medieval);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      max-width: 320px;
+      width: 85%;
+      box-shadow: 0 0 30px rgba(212, 160, 23, 0.3);
+    }
+
+    .modal-title {
+      color: var(--amber);
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    /* ===== CANVAS PARTICLE OVERLAY ===== */
+    #particle-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ===== CHARACTER CREATION OVERLAY ===== */
+    #creation-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-deepest);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .creation-box {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-panel);
+      border: 3px double var(--border-medieval);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: auto 0;
+    }
+
+    .creation-title-sec {
+      text-align: center;
+    }
+
+    .creation-logo {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--amber-light);
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(212, 160, 23, 0.5);
+      margin-bottom: 4px;
+    }
+
+    .creation-subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .creation-preview-area {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0d1020;
+      border: 1px solid var(--border-medieval);
+      border-radius: 8px;
+      padding: 12px;
+      height: 100px;
+    }
+
+    #preview-canvas {
+      width: 120px;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+
+    .custom-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .custom-label {
+      font-size: 11px;
+      color: var(--amber);
+      letter-spacing: 1px;
+    }
+
+    .custom-options {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .btn-opt {
+      flex: 1;
+      min-width: 50px;
+      padding: 5px 6px;
+      background: #080a10;
+      border: 1px solid var(--border-medieval);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .btn-opt:hover {
+      border-color: var(--amber-light);
+      color: var(--text-primary);
+    }
+
+    .btn-opt.active {
+      background: rgba(212, 160, 23, 0.15);
+      border-color: var(--amber-light);
+      color: var(--amber-light);
+      box-shadow: 0 0 8px rgba(212, 160, 23, 0.2);
+    }
+
+    /* Unlockable Indicators in UI */
+    .unlocked-benefit {
+      color: var(--emerald);
+      font-weight: bold;
+      border: 1px dashed var(--emerald);
+      background: rgba(46, 204, 113, 0.05);
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+
+    .locked-option {
+      opacity: 0.4;
+      cursor: not-allowed;
+      position: relative;
+    }
+    .locked-option::after {
+      content: '🔒';
+      position: absolute;
+      top: 2px; right: 2px;
+      font-size: 9px;
+    }
+
+    /* Account / Slot Cards */
+    .slot-card {
+      background: #080a10;
+      border: 2px solid var(--border-medieval);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .slot-card.active {
+      border-color: var(--emerald);
+      background: rgba(46, 204, 113, 0.05);
+    }
+    .slot-card.locked {
+      opacity: 0.5;
+      border-color: var(--text-dim);
+      cursor: not-allowed;
+    }
+
+    .pixel-svg-icon {
+      width: 24px;
+      height: 24px;
+      image-rendering: pixelated;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .nav-button .pixel-svg-icon {
+      width: 28px;
+      height: 28px;
+      margin-bottom: 2px;
+    }
+
+    .trash-svg-icon {
+      width: 18px;
+      height: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="particle-overlay"></canvas>
+<div id="notif-toast"></div>
+
+<!-- Character Creation Overlay (Onboard) -->
+<div id="creation-overlay">
+  <div class="creation-box">
+    <div class="creation-title-sec">
+      <div class="creation-logo">LIFE RPG ⚔️</div>
+      <div class="creation-subtitle">나만의 갓생 모험가 생성</div>
+    </div>
+
+    <!-- Live Preview -->
+    <div class="creation-preview-area">
+      <canvas id="preview-canvas"></canvas>
+    </div>
+
+    <!-- Name input -->
+    <div class="custom-row">
+      <span class="custom-label">모험가 이름 (계정 식별용)</span>
+      <input type="text" class="game-input" id="creation-name-input" placeholder="이름을 입력해 주세요 (최대 8자)" maxlength="8">
+    </div>
+
+    <!-- Customization Tools -->
+    <div class="custom-row">
+      <span class="custom-label">모험가 성별 (아바타 헤어스타일)</span>
+      <div class="custom-options">
+        <button class="btn-opt active" id="opt-gen-male" onclick="setCreatorGender('male')">남성</button>
+        <button class="btn-opt" id="opt-gen-female" onclick="setCreatorGender('female')">여성</button>
+      </div>
+    </div>
+
+    <div class="custom-row">
+      <span class="custom-label">모험가 머리색</span>
+      <div class="custom-options" id="hair-color-options"></div>
+    </div>
+
+    <div class="custom-row">
+      <span class="custom-label">모험가 눈동자 색</span>
+      <div class="custom-options" id="eye-color-options"></div>
+    </div>
+
+    <div class="custom-row">
+      <span class="custom-label">상의 선택</span>
+      <div class="custom-options" id="top-outfit-options"></div>
+    </div>
+
+    <div class="custom-row">
+      <span class="custom-label">하의 선택</span>
+      <div class="custom-options" id="bottom-outfit-options"></div>
+    </div>
+
+    <div class="custom-row">
+      <span class="custom-label">신발 선택</span>
+      <div class="custom-options" id="shoes-outfit-options"></div>
+    </div>
+
+    <button class="btn-primary" style="padding: 10px; font-size: 12px; margin-top: 10px;" onclick="finalizeCharacter()">
+      모험가 등록 후 광장 입장하기
+    </button>
+  </div>
+</div>
+
+<!-- Modal Dialog -->
+<div id="modal-overlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modal-title">TITLE</div>
+    <div id="modal-body" style="font-size: 13px; margin-bottom: 18px; line-height: 1.5;">BODY</div>
+    <button class="btn-primary" onclick="closeModal()">확인</button>
+  </div>
+</div>
+
+<div id="app">
+  <!-- HUD Header -->
+  <div id="status-hud">
+    <div class="hud-row">
+      <div class="hero-title" id="hero-display">LV.1 견습 용사</div>
+      <div class="gold-purse" id="purse-hud-area">
+        <!-- JS로 픽셀 골드 장치 렌더링 -->
+        <span id="gold-display">0</span> G
+      </div>
+    </div>
+    <div class="xp-hud-container">
+      <div class="xp-details">
+        <span>WORLD TIER: <span id="graphics-tier" style="color:var(--amber-light); font-weight:bold;">CLASSIC</span></span>
+        <span id="xp-text">0 / 100 XP</span>
+      </div>
+      <div class="xp-track">
+        <div class="xp-fill" id="xp-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN (TOWN VIEWPORT) -->
+  <div id="game-viewport">
+    <canvas id="town-canvas"></canvas>
+
+    <!-- 실시간 퀵 스펙 창 -->
+    <div class="quick-specs">
+      <div class="spec-pill">⚔️ <span id="spec-weapon">낡은 목검</span></div>
+      <div class="spec-pill">🛡️ <span id="spec-armor">평상복</span></div>
+      <div class="spec-pill" id="spec-accessory-pill" style="display:none;">👑 <span id="spec-accessory">없음</span></div>
+      <div class="spec-pill" id="spec-pet-pill" style="display:none;">🐾 <span id="spec-pet">없음</span></div>
+    </div>
+
+    <!-- 광장 전용 플로팅 보조 버튼 (아이템창, 옷장, 계정) -->
+    <div class="plaza-side-controls" id="floating-sidebar-area">
+      <!-- 픽셀 SVG로 동적 로드됨 -->
+    </div>
+
+    <!-- WINDOW: QUEST BOARD -->
+    <div class="game-window" id="win-quest">
+      <div class="window-header">
+        <div class="window-title" id="win-title-quest">
+          왕국 퀘스트 게시판
+        </div>
+        <button class="btn-close-win" onclick="closeWindow('win-quest')">×</button>
+      </div>
+      <div class="window-content">
+        <!-- Main Quest Section -->
+        <div class="section-header">
+          <span>🐉 대장정 (메인 퀘스트)</span>
+          <button class="btn-action-sm" onclick="toggleForm('form-main-quest')">＋ 신규 대장정</button>
+        </div>
+
+        <div class="sliding-form" id="form-main-quest">
+          <div class="form-group">
+            <span class="form-label">메인 목표 이름</span>
+            <input type="text" class="game-input" id="main-q-input" placeholder="예: 토익 850점 성취, 바디프로필 촬영">
+          </div>
+          <button class="btn-primary" onclick="addMainQuest()">대장정 추가</button>
+        </div>
+        <div id="main-quests-container"></div>
+
+        <!-- Normal Quest Section -->
+        <div class="section-header" style="margin-top: 14px;">
+          <span>⚔️ 일일 의뢰 (일반 퀘스트)</span>
+          <button class="btn-action-sm" onclick="toggleForm('form-normal-quest')">＋ 일일 의뢰</button>
+        </div>
+
+        <div class="sliding-form" id="form-normal-quest">
+          <div class="form-group">
+            <span class="form-label">의뢰 내용</span>
+            <input type="text" class="game-input" id="normal-q-input" placeholder="예: 기출문제 1회분 풀기, 스쿼트 100회">
+          </div>
+          <div class="form-group">
+            <span class="form-label">대장정 연동</span>
+            <select class="game-select" id="normal-q-link">
+              <option value="">— 연동 없음 —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <span class="form-label">의뢰 난이도</span>
+            <div class="difficulty-grid">
+              <button class="btn-diff" id="diff-low" onclick="selectDifficulty('low')">하<br><small>10XP/5G</small></button>
+              <button class="btn-diff" id="diff-mid" onclick="selectDifficulty('mid')">중<br><small>30XP/15G</small></button>
+              <button class="btn-diff" id="diff-high" onclick="selectDifficulty('high')">상<br><small>60XP/30G</small></button>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="addNormalQuest()">의뢰 등록</button>
+        </div>
+        <div id="normal-quests-container"></div>
+      </div>
+    </div>
+
+    <!-- WINDOW: SHOP -->
+    <div class="game-window" id="win-shop">
+      <div class="window-header">
+        <div class="window-title" id="win-title-shop">
+          황금 사자 상점
+        </div>
+        <button class="btn-close-win" onclick="closeWindow('win-shop')">×</button>
+      </div>
+      <div class="window-content">
+        <!-- RPG Equipment Shop -->
+        <div class="section-header">⚔️ 무장 상점</div>
+        <div class="shop-grid" id="equipment-shop-container"></div>
+
+        <!-- Real Life Rewards -->
+        <div class="section-header" style="margin-top: 16px;">
+          <span>🎁 현실 휴식 보상</span>
+          <button class="btn-action-sm" onclick="toggleForm('form-custom-reward')">＋ 신규 상품</button>
+        </div>
+
+        <div class="sliding-form" id="form-custom-reward">
+          <div class="form-group">
+            <span class="form-label">보상 이름</span>
+            <input type="text" class="game-input" id="reward-input-name" placeholder="예: 치킨 시켜먹기, 닌텐도 1시간">
+          </div>
+          <div class="form-group">
+            <span class="form-label">소모 골드 가격</span>
+            <input type="number" class="game-input" id="reward-input-gold" placeholder="예: 150">
+          </div>
+          <button class="btn-primary" onclick="addCustomReward()">상품 등록</button>
+        </div>
+        <div class="shop-grid" id="custom-rewards-container" style="margin-top: 6px;"></div>
+      </div>
+    </div>
+
+    <!-- WINDOW: CLOSET (옷장) -->
+    <div class="game-window" id="win-closet">
+      <div class="window-header">
+        <div class="window-title">👗 용사의 드레스룸 (옷장)</div>
+        <button class="btn-close-win" onclick="closeWindow('win-closet')">×</button>
+      </div>
+      <div class="window-content" id="closet-content">
+        <!-- Dynamic rendering inside JS -->
+      </div>
+    </div>
+
+    <!-- WINDOW: INVENTORY (아이템창) -->
+    <div class="game-window" id="win-inventory">
+      <div class="window-header">
+        <div class="window-title">🎒 소지품 가방 (인벤토리)</div>
+        <button class="btn-close-win" onclick="closeWindow('win-inventory')">×</button>
+      </div>
+      <div class="window-content">
+        <div class="section-header">⚔️ 보유 무기 장비</div>
+        <div class="shop-grid" id="inv-weapons-container"></div>
+
+        <div class="section-header" style="margin-top: 15px;">🛡️ 보유 갑옷 의상</div>
+        <div class="shop-grid" id="inv-armors-container"></div>
+      </div>
+    </div>
+
+    <!-- WINDOW: ACCOUNTS (계정 광장) -->
+    <div class="game-window" id="win-accounts">
+      <div class="window-header">
+        <div class="window-title">👥 왕립 용사 관리소 (계정 및 환생)</div>
+        <button class="btn-close-win" onclick="closeWindow('win-accounts')">×</button>
+      </div>
+      <div class="window-content">
+        <div class="section-header">🧬 대제단: 용사 환생 (Rebirth)</div>
+        <div class="game-card" style="border-color: var(--amber);">
+          <div style="font-size: 13px; font-weight: bold; color: var(--amber-light); margin-bottom: 6px;">✨ 윤회의 고리 돌리기</div>
+          <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 8px;">
+            현재 모험가가 <span style="color: var(--amber); font-weight: bold;">레벨 100</span>에 도달하면 대단원에 따른 환생을 선택할 수 있습니다.<br>
+            <span style="color: var(--emerald); font-weight: bold;">✔ 환생 계승 사항</span>: 골드, 상점 무장, 커스텀 보상 목록<br>
+            <span style="color: var(--crimson); font-weight: bold;">⚠️ 환생 초기화 사항</span>: 캐릭터 레벨(1로 복구), XP(0으로 복구), 퀘스트 진행 내역<br>
+            <span style="color: var(--amber-light); font-weight: bold;">👑 환생 영구 혜택</span>: 이름 옆에 성과 메달(<span style="color:var(--emerald);">★</span>) 부착, 환생당 <span style="color: var(--emerald); font-weight: bold;">영구 획득 골드 및 XP 15% 추가 가산 버프</span>!
+          </p>
+          <div id="rebirth-action-container"></div>
+        </div>
+
+        <div class="section-header" style="margin-top: 15px;">👥 다중 용사 관리 (부계정 전환)</div>
+        <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 10px;">
+          계정 내 어떤 용사라도 한 번 이상 <span style="color:var(--amber);">레벨 100</span>을 기록하면 슬롯 2, 3이 완전 해금되어, 각각의 새로운 이름과 진행도로 서브 모험을 떠날 수 있습니다.
+        </p>
+        <div id="accounts-slots-container"></div>
+      </div>
+    </div>
+
+    <!-- WINDOW: BADGE & STATS -->
+    <div class="game-window" id="win-bag">
+      <div class="window-header">
+        <div class="window-title" id="win-title-bag">
+          모험 인장 및 공적
+        </div>
+        <button class="btn-close-win" onclick="closeWindow('win-bag')">×</button>
+      </div>
+      <div class="window-content">
+        <div class="section-header">📜 모험 업적 통계</div>
+        <div class="shop-grid" style="margin-bottom: 14px;">
+          <div class="shop-card">
+            <div class="shop-icon-wrapper" id="trophy-icon-area"></div>
+            <div class="shop-info">
+              <div class="shop-name">달성 실적</div>
+              <div class="shop-desc">총 완료 의뢰: <span id="stat-total-q" style="color:var(--amber);">0</span>회 | 대성공: <span id="stat-total-great" style="color:var(--amber);">0</span>회</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">🧾 영수증 이력 (최근 15개)</div>
+        <div class="shop-grid" id="purchase-history-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME BOTTOM NAVIGATION BAR -->
+  <div id="bottom-menu-bar">
+    <!-- JS에서 완벽 도트 Nav 버튼을 자동으로 렌더링 -->
+  </div>
+</div>
+
+<script>
+// ============================================================
+// ============================================================
+// 순수 도트 픽셀 아트 SVG 상수 정의 (이모지 및 시스템 폰트 완벽 배제)
+// ============================================================
+const PIXEL_SVGS = {
+  coin: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none">
+    <rect x="2" y="1" width="4" height="6" fill="#8a6610"/>
+    <rect x="1" y="2" width="6" height="4" fill="#8a6610"/>
+    <rect x="2" y="2" width="4" height="4" fill="#f5c842"/>
+    <rect x="3" y="3" width="2" height="2" fill="#d4a017"/>
+  </svg>`,
+  scroll: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none">
+    <rect x="1" y="1" width="6" height="6" fill="#8a6610"/>
+    <rect x="2" y="2" width="4" height="4" fill="#f5c842"/>
+    <rect x="3" y="3" width="2" height="1" fill="#8a6610"/>
+    <rect x="3" y="5" width="2" height="1" fill="#8a6610"/>
+  </svg>`,
+  chest: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none">
+    <rect x="1" y="2" width="6" height="5" fill="#8a6610"/>
+    <rect x="2" y="1" width="4" height="2" fill="#d4a017"/>
+    <rect x="2" y="4" width="4" height="2" fill="#111422"/>
+    <rect x="4" y="3" width="1" height="2" fill="#f5c842"/>
+  </svg>`,
+  medal: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none">
+    <rect x="3" y="1" width="2" height="3" fill="#c0392b"/>
+    <rect x="2" y="4" width="4" height="3" fill="#d4a017"/>
+    <rect x="3" y="5" width="2" height="1" fill="#f5c842"/>
+  </svg>`,
+  trophy: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="2" y="1" width="4" height="1" fill="#f5c842"/>
+    <rect x="1" y="2" width="6" height="2" fill="#d4a017"/>
+    <rect x="2" y="4" width="4" height="1" fill="#8a6610"/>
+    <rect x="3" y="5" width="2" height="2" fill="#8a6610"/>
+    <rect x="2" y="7" width="4" height="1" fill="#111422"/>
+  </svg>`,
+  account: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none">
+    <rect x="2" y="1" width="4" height="3" fill="#3498db"/>
+    <rect x="1" y="4" width="6" height="3" fill="#1b2033"/>
+    <rect x="3" y="2" width="2" height="2" fill="#fcdcb4"/>
+  </svg>`,
+  bag: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none">
+    <rect x="2" y="1" width="4" height="2" fill="#78281f"/>
+    <rect x="1" y="3" width="6" height="4" fill="#c0392b"/>
+    <rect x="3" y="4" width="2" height="2" fill="#d4a017"/>
+  </svg>`,
+  closet: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none">
+    <rect x="1" y="1" width="6" height="6" fill="#8e44ad"/>
+    <rect x="2" y="2" width="4" height="4" fill="#d2b4de"/>
+    <rect x="3" y="1" width="2" height="2" fill="#2c3e50"/>
+  </svg>`,
+  trash: `<svg class="pixel-svg-icon trash-svg-icon" viewBox="0 0 8 8" fill="none">
+    <rect x="2" y="1" width="4" height="1" fill="#e74c3c" />
+    <rect x="1" y="2" width="6" height="1" fill="#e74c3c" />
+    <rect x="2" y="3" width="4" height="4" fill="#c0392b" />
+    <rect x="3" y="4" width="1" height="2" fill="#181c2f" />
+    <rect x="4" y="4" width="1" height="2" fill="#181c2f" />
+  </svg>`,
+  gift: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none">
+    <rect x="1" y="2" width="6" height="5" fill="#e74c3c"/>
+    <rect x="1" y="3" width="6" height="1" fill="#f1c40f"/>
+    <rect x="3" y="2" width="2" height="5" fill="#f1c40f"/>
+    <rect x="2" y="1" width="4" height="1" fill="#f1c40f"/>
+  </svg>`,
+  
+  // 무기 도트 리스트 (8x8)
+  w0: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="1" y="6" width="1" height="1" fill="#5d4037"/>
+    <rect x="2" y="5" width="1" height="1" fill="#5d4037"/>
+    <rect x="1" y="4" width="3" height="1" fill="#8e5e38"/>
+    <rect x="3" y="3" width="1" height="1" fill="#a0522d"/>
+    <rect x="4" y="2" width="1" height="1" fill="#a0522d"/>
+    <rect x="5" y="1" width="1" height="1" fill="#cd853f"/>
+  </svg>`,
+  w1: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="2" y="6" width="1" height="1" fill="#1b1b1b"/>
+    <rect x="1" y="4" width="3" height="1" fill="#7f8c8d"/>
+    <rect x="3" y="3" width="1" height="1" fill="#bdc3c7"/>
+    <rect x="4" y="2" width="1" height="1" fill="#bdc3c7"/>
+    <rect x="5" y="1" width="1" height="1" fill="#ecf0f1"/>
+  </svg>`,
+  w2: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="1" y="6" width="1" height="1" fill="#f1c40f"/>
+    <rect x="2" y="5" width="1" height="1" fill="#7f8c8d"/>
+    <rect x="1" y="4" width="3" height="1" fill="#34495e"/>
+    <rect x="3" y="3" width="1" height="1" fill="#95a5a6"/>
+    <rect x="4" y="2" width="1" height="1" fill="#bdc3c7"/>
+    <rect x="5" y="1" width="1" height="1" fill="#ffffff"/>
+  </svg>`,
+  w3: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="1" y="6" width="1" height="1" fill="#8a6610"/>
+    <rect x="2" y="5" width="1" height="1" fill="#8a6610"/>
+    <rect x="3" y="4" width="1" height="1" fill="#8a6610"/>
+    <rect x="4" y="3" width="1" height="1" fill="#8a6610"/>
+    <rect x="5" y="1" width="2" height="2" fill="#e74c3c"/>
+    <rect x="4" y="1" width="1" height="1" fill="#f1c40f"/>
+    <rect x="6" y="3" width="1" height="1" fill="#f39c12"/>
+  </svg>`,
+  w4: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="1" y="6" width="1" height="1" fill="#9b59b6"/>
+    <rect x="2" y="5" width="1" height="1" fill="#9b59b6"/>
+    <rect x="1" y="4" width="3" height="1" fill="#f1c40f"/>
+    <rect x="3" y="3" width="1" height="1" fill="#3498db"/>
+    <rect x="4" y="2" width="1" height="1" fill="#85c1e9"/>
+    <rect x="5" y="1" width="1" height="1" fill="#ffffff"/>
+  </svg>`,
+
+  // 방어구 도트 리스트 (8x8)
+  a0: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="2" y="2" width="4" height="4" fill="#34495e"/>
+    <rect x="1" y="3" width="1" height="2" fill="#2c3e50"/>
+    <rect x="6" y="3" width="1" height="2" fill="#2c3e50"/>
+    <rect x="3" y="1" width="2" height="1" fill="#fcdcb4"/>
+  </svg>`,
+  a1: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="2" y="2" width="4" height="5" fill="#d35400"/>
+    <rect x="1" y="3" width="6" height="2" fill="#a04000"/>
+    <rect x="3" y="3" width="2" height="2" fill="#f39c12"/>
+  </svg>`,
+  a2: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="2" y="2" width="4" height="5" fill="#7f8c8d"/>
+    <rect x="1" y="3" width="6" height="2" fill="#95a5a6"/>
+    <rect x="3" y="4" width="2" height="2" fill="#34495e"/>
+  </svg>`,
+  a3: `<svg class="pixel-svg-icon" viewBox="0 0 8 8" fill="none" style="width:32px; height:32px;">
+    <rect x="2" y="2" width="4" height="5" fill="#ecf0f1"/>
+    <rect x="1" y="3" width="6" height="2" fill="#bdc3c7"/>
+    <rect x="2" y="1" width="4" height="1" fill="#f1c40f"/>
+    <rect x="3" y="3" width="2" height="3" fill="#3498db"/>
+  </svg>`
+};
+
+const HERO_TITLES = [
+  '견습 용사', '초보 전사', '방랑 모험가', '정예 기사', '왕국 투사', 
+  '엘리트 용사', '마룡 사냥꾼', '드래곤 나이트', '명예 기사단장', '대륙의 구원자', '전설의 신화'
+];
+
+const DEFAULT_ARMAMENTS = [
+  { id: 'w0', type: 'weapon', name: '낡은 목검', icon: 'w0', price: 0, desc: '나뭇가지를 깎아 만든 기본 검.', rarity: 'common' },
+  { id: 'w1', type: 'weapon', name: '무쇠 단검', icon: 'w1', price: 50, desc: '비교적 가볍고 날카로운 단검.', rarity: 'uncommon' },
+  { id: 'w2', type: 'weapon', name: '정밀 강철검', icon: 'w2', price: 140, desc: '왕국 제식 대용 강철검.', rarity: 'rare' },
+  { id: 'w3', type: 'weapon', name: '화염의 지팡이', icon: 'w3', price: 320, desc: '마력 응축구가 박힌 불타는 지팡이.', rarity: 'legendary' },
+  { id: 'w4', type: 'weapon', name: '영혼의 성검', icon: 'w4', price: 650, desc: '신성한 에테르 빛을 내뿜는 빛의 성검.', rarity: 'mythic' },
+  { id: 'a0', type: 'armor', name: '모험가 평상복', icon: 'a0', price: 0, desc: '지급된 기본 아바타 의복.', rarity: 'common' },
+  { id: 'a1', type: 'armor', name: '견고한 가죽갑옷', icon: 'a1', price: 70, desc: '야생 가죽을 덧댄 실용성 높은 가죽 갑옷.', rarity: 'uncommon' },
+  { id: 'a2', type: 'armor', name: '무쇠 사슬갑옷', icon: 'a2', price: 180, desc: '촘촘한 철사슬망으로 된 호신용 갑옷.', rarity: 'rare' },
+  { id: 'a3', type: 'armor', name: '백은의 풀플레이트', icon: 'a3', price: 400, desc: '단단히 가공된 은백색 전신 중갑옷.', rarity: 'legendary' }
+];
+
+const HAIR_COLORS = [
+  { name: '갈색', value: '#4a2306' },
+  { name: '흑발', value: '#1a1a1a' },
+  { name: '금발', value: '#f1c40f' },
+  { name: '은발', value: '#bdc3c7' },
+  { name: '보라', value: '#8e44ad' },
+  { name: '청색', value: '#2980b9' },
+  { name: '녹색', value: '#27ae60' },
+  { name: '적발', value: '#c0392b' }
+];
+
+const EYE_COLORS = [
+  { name: '갈색', value: '#5d4037' },
+  { name: '검은색', value: '#111111' },
+  { name: '푸른색', value: '#2980b9' },
+  { name: '초록색', value: '#2ecc71' },
+  { name: '보라색', value: '#9b59b6' },
+  { name: '붉은색', value: '#e74c3c' },
+  { name: '금안', value: '#f39c12' },
+  { name: '백색', value: '#ecf0f1' }
+];
+
+const TOP_OUTFITS = [
+  { id: 't_fantasy_classic', name: '수련 로브 (녹)', color: '#1abc9c', shadow: '#16a085' },
+  { id: 't_fantasy_crimson', name: '정예 투닉 (적)', color: '#e74c3c', shadow: '#c0392b' },
+  { id: 't_modern_white', name: '면 티셔츠 (백)', color: '#f5f5f5', shadow: '#bdc3c7' },
+  { id: 't_modern_black', name: '셔츠 (흑)', color: '#34495e', shadow: '#2c3e50' }
+];
+
+const BOTTOM_OUTFITS = [
+  { id: 'b_fantasy_pants', name: '모험가 바지 (초)', color: '#16a085', shadow: '#0e6251' },
+  { id: 'b_fantasy_dark', name: '기사 하의 (암)', color: '#2c3e50', shadow: '#1a252f' },
+  { id: 'b_modern_jeans', name: '청바지 (청)', color: '#2980b9', shadow: '#1f618d' },
+  { id: 'b_modern_slacks', name: '슬랙스 (회)', color: '#7f8c8d', shadow: '#5f6a6a' }
+];
+
+const SHOES_OUTFITS = [
+  { id: 's_fantasy_leather', name: '가죽 롱부츠', color: '#5d4037' },
+  { id: 's_fantasy_iron', name: '철제 군화', color: '#7f8c8d' },
+  { id: 's_modern_runners', name: '런닝화 (백)', color: '#ecf0f1' },
+  { id: 's_modern_boots', name: '첼시부츠 (흑)', color: '#1b1b1b' }
+];
+
+// 헤어 스타일 리스트 정의 (Level 10+ 해금 전용)
+const HAIR_STYLES = [
+  { id: 'style_1', name: '클래식 단발', desc: '가장 단정하고 기품있는 기본형 머리' },
+  { id: 'style_2', name: '와일드 기사', desc: '하늘을 향해 삐죽하게 솟은 거친 전사의 머리' },
+  { id: 'style_3', name: '땋은 트윈테일', desc: '소녀풍의 양 갈래로 길게 늘어뜨려 땋아 내린 머리' },
+  { id: 'style_4', name: '마도 전투후드', desc: '신비로운 에너지가 도는 전투 후드모자' }
+];
+
+const ACCESSORY_LIST = {
+  none: { name: '없음', emoji: '❌', reqLv: 0 },
+  glasses: { name: '학구적인 안경', emoji: '👓', reqLv: 10 },
+  eyepatch: { name: '의리용 안대', emoji: '👁️', reqLv: 10 },
+  crown: { name: '골든 크라운', emoji: '👑', reqLv: 10 },
+  wings: { name: '드래곤의 등날개', emoji: '🐉', reqLv: 80 }
+};
+
+const PET_LIST = {
+  none: { name: '없음', emoji: '❌', reqLv: 0 },
+  slime: { name: '아기 슬라임', emoji: '💧', reqLv: 40 },
+  phoenix: { name: '미니 피닉스', emoji: '🔥', reqLv: 40 },
+  baby_dragon: { name: '레전더리 해츨링', emoji: '🐊', reqLv: 90 }
+};
+
+// ============================================================
+// 글로벌 다중 계정 데이터 구조
+let globalState = {
+  currentSlot: 'slot_1',
+  hasUnlockedSubAccounts: false,
+  slots: {
+    slot_1: null,
+    slot_2: null,
+    slot_3: null
+  }
+};
+
+function createDefaultCharacter(name) {
+  return {
+    characterCreated: true,
+    name: name,
+    gender: creatorState.gender,
+    hairColor: creatorState.hairColor,
+    eyeColor: creatorState.eyeColor,
+    topOutfit: creatorState.topOutfit,
+    bottomOutfit: creatorState.bottomOutfit,
+    shoesOutfit: creatorState.shoesOutfit,
+    equippedHairStyle: 'style_1', // 기본 헤어 스타일 지정
+    equippedAccessory: 'none',
+    equippedPet: 'none',
+    level: 1,
+    xp: 0,
+    gold: 0,
+    mainQuests: [],
+    normalQuests: [],
+    customRewards: [],
+    ownedItems: ['w0', 'a0'],
+    equippedWeapon: 'w0',
+    equippedArmor: 'a0',
+    statQuests: 0,
+    statGreat: 0,
+    purchaseHistory: [],
+    rebirthCount: 0,
+    lastResetDate: getTodayString()
+  };
+}
+
+let state = {}; 
+
+let creatorState = {
+  gender: 'male',
+  hairColor: '#4a2306',
+  eyeColor: '#2980b9',
+  topOutfit: 't_fantasy_classic',
+  bottomOutfit: 'b_fantasy_pants',
+  shoesOutfit: 's_fantasy_leather'
+};
+
+let selectedDiff = null;
+let currentActiveWindow = null;
+let particleTimer = null;
+let previewCanvasTimer = null;
+let targetSlotToCreate = 'slot_1';
+
+function saveState() {
+  if (globalState.currentSlot && globalState.slots[globalState.currentSlot]) {
+    globalState.slots[globalState.currentSlot] = Object.assign({}, state);
+  }
+  localStorage.setItem('LifeRPG_Classic_AccountSystem_V3', JSON.stringify(globalState));
+}
+
+function loadState() {
+  const saved = localStorage.getItem('LifeRPG_Classic_AccountSystem_V3');
+  
+  if (saved) {
+    try {
+      globalState = Object.assign(globalState, JSON.parse(saved));
+    } catch(e) {
+      console.error("데이터 복원 오류", e);
+    }
+  } else {
+    const oldV2 = localStorage.getItem('LifeRPG_Classic_State_V2') || localStorage.getItem('LifeRPG_Classic_State');
+    if (oldV2) {
+      try {
+        const parsed = JSON.parse(oldV2);
+        if (parsed && parsed.characterCreated) {
+          globalState.slots.slot_1 = Object.assign(createDefaultCharacter("선대 용사"), parsed);
+          globalState.slots.slot_1.characterCreated = true;
+          if (globalState.slots.slot_1.level >= 100) {
+            globalState.hasUnlockedSubAccounts = true;
+          }
+          localStorage.removeItem('LifeRPG_Classic_State_V2');
+          localStorage.removeItem('LifeRPG_Classic_State');
+        }
+      } catch(e) {
+        console.error("V2 이전 마이그레이션 실패", e);
+      }
+    }
+  }
+
+  const curSlot = globalState.currentSlot;
+  if (globalState.slots[curSlot]) {
+    state = globalState.slots[curSlot];
+    // 오래된 마이그레이션 대비 필드 보호
+    if (!state.equippedHairStyle) state.equippedHairStyle = 'style_1';
+  } else {
+    state = { characterCreated: false };
+  }
+}
+
+function getTodayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function dailyResetCheck() {
+  if (!state.characterCreated) return;
+  const todayStr = getTodayString();
+  if (state.lastResetDate !== todayStr) {
+    state.normalQuests.forEach(q => {
+      q.doneToday = false;
+      q.wasGreat = false;
+    });
+    state.lastResetDate = todayStr;
+    saveState();
+    triggerToast('🌅 새로운 하루의 태양이 떴습니다! 일반 의뢰가 초기화됩니다.', 'emerald');
+  }
+}
+
+// ============================================================
+// ============================================================
+function initCreatorScreen() {
+  if (state.characterCreated) {
+    document.getElementById('creation-overlay').style.display = 'none';
+    return;
+  }
+  document.getElementById('creation-overlay').style.display = 'flex';
+  document.getElementById('creation-name-input').value = '';
+
+  const hairBox = document.getElementById('hair-color-options');
+  hairBox.innerHTML = HAIR_COLORS.map(c => `
+    <button class="btn-opt ${creatorState.hairColor === c.value ? 'active' : ''}" 
+            onclick="setCreatorHair('${c.value}')" style="border-bottom: 3px solid ${c.value}">
+      ${c.name}
+    </button>
+  `).join('');
+
+  const eyeBox = document.getElementById('eye-color-options');
+  eyeBox.innerHTML = EYE_COLORS.map(c => `
+    <button class="btn-opt ${creatorState.eyeColor === c.value ? 'active' : ''}" 
+            onclick="setCreatorEye('${c.value}')" style="border-bottom: 3px solid ${c.value}">
+      ${c.name}
+    </button>
+  `).join('');
+
+  const topBox = document.getElementById('top-outfit-options');
+  topBox.innerHTML = TOP_OUTFITS.map(t => `
+    <button class="btn-opt ${creatorState.topOutfit === t.id ? 'active' : ''}" 
+            onclick="setCreatorPart('topOutfit', '${t.id}')">
+      ${t.name}
+    </button>
+  `).join('');
+
+  const bottomBox = document.getElementById('bottom-outfit-options');
+  bottomBox.innerHTML = BOTTOM_OUTFITS.map(b => `
+    <button class="btn-opt ${creatorState.bottomOutfit === b.id ? 'active' : ''}" 
+            onclick="setCreatorPart('bottomOutfit', '${b.id}')">
+      ${b.name}
+    </button>
+  `).join('');
+
+  const shoesBox = document.getElementById('shoes-outfit-options');
+  shoesBox.innerHTML = SHOES_OUTFITS.map(s => `
+    <button class="btn-opt ${creatorState.shoesOutfit === s.id ? 'active' : ''}" 
+            onclick="setCreatorPart('shoesOutfit', '${s.id}')">
+      ${s.name}
+    </button>
+  `).join('');
+
+  startCreatorPreviewLoop();
+}
+
+function setCreatorGender(gen) {
+  creatorState.gender = gen;
+  document.getElementById('opt-gen-male').classList.toggle('active', gen === 'male');
+  document.getElementById('opt-gen-female').classList.toggle('active', gen === 'female');
+}
+
+function setCreatorHair(color) {
+  creatorState.hairColor = color;
+  const btns = document.querySelectorAll('#hair-color-options .btn-opt');
+  HAIR_COLORS.forEach((c, idx) => {
+    btns[idx].classList.toggle('active', c.value === color);
+  });
+}
+
+function setCreatorEye(color) {
+  creatorState.eyeColor = color;
+  const btns = document.querySelectorAll('#eye-color-options .btn-opt');
+  EYE_COLORS.forEach((c, idx) => {
+    btns[idx].classList.toggle('active', c.value === color);
+  });
+}
+
+function setCreatorPart(partName, partId) {
+  creatorState[partName] = partId;
+  let targetBoxId = '';
+  let arr = [];
+  if (partName === 'topOutfit') { targetBoxId = '#top-outfit-options'; arr = TOP_OUTFITS; }
+  else if (partName === 'bottomOutfit') { targetBoxId = '#bottom-outfit-options'; arr = BOTTOM_OUTFITS; }
+  else if (partName === 'shoesOutfit') { targetBoxId = '#shoes-outfit-options'; arr = SHOES_OUTFITS; }
+
+  const btns = document.querySelectorAll(`${targetBoxId} .btn-opt`);
+  arr.forEach((item, idx) => {
+    btns[idx].classList.toggle('active', item.id === partId);
+  });
+}
+
+function finalizeCharacter() {
+  const nameInput = document.getElementById('creation-name-input');
+  const name = nameInput.value.trim();
+  if (!name) {
+    triggerToast('모험가의 이름을 입력해 주세요!', 'crimson');
+    return;
+  }
+
+  globalState.slots[targetSlotToCreate] = createDefaultCharacter(name);
+  globalState.currentSlot = targetSlotToCreate;
+  state = globalState.slots[targetSlotToCreate];
+
+  saveState();
+  if (previewCanvasTimer) cancelAnimationFrame(previewCanvasTimer);
+  document.getElementById('creation-overlay').style.display = 'none';
+
+  updateHUD();
+  drawTown();
+  triggerToast(`⚔️ 용사 ${name}님, 갓생의 대광장에 입장하셨습니다!`, 'emerald');
+}
+
+function startCreatorPreviewLoop() {
+  const canvas = document.getElementById('preview-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  function renderFrame() {
+    canvas.width = 120;
+    canvas.height = 100;
+    
+    const pw = canvas.width / 40;
+    const ph = canvas.height / 30;
+
+    function putRect(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(Math.floor(x * pw), Math.floor(y * ph), Math.ceil(w * pw), Math.ceil(h * ph));
+    }
+
+    ctx.fillStyle = '#0d1020';
+    ctx.fillRect(0,0,canvas.width, canvas.height);
+
+    const cx = 20;
+    const cy = 25;
+    const tick = Date.now() / 150;
+    const breathY = Math.floor(Math.sin(tick * 0.8) * 1.0);
+
+    putRect(cx - 5, cy + 1, 10, 1, 'rgba(0,0,0,0.35)');
+
+    const currentTop = TOP_OUTFITS.find(t => t.id === creatorState.topOutfit) || TOP_OUTFITS[0];
+    const currentBottom = BOTTOM_OUTFITS.find(b => b.id === creatorState.bottomOutfit) || BOTTOM_OUTFITS[0];
+    const currentShoes = SHOES_OUTFITS.find(s => s.id === creatorState.shoesOutfit) || SHOES_OUTFITS[0];
+
+    let legColor = currentBottom.color;
+    let footColor = currentShoes.color;
+    let bodyColor = currentTop.color;
+    let trimColor = currentTop.shadow;
+
+    putRect(cx - 3, cy - 2, 2, 3, legColor);
+    putRect(cx + 1, cy - 2, 2, 3, legColor);
+    putRect(cx - 4, cy, 2, 1, footColor);
+    putRect(cx + 2, cy, 2, 1, footColor);
+
+    putRect(cx - 4, cy - 10 + breathY, 8, 8, bodyColor);
+    putRect(cx - 4, cy - 5 + breathY, 8, 1, trimColor);
+
+    putRect(cx - 3, cy - 15 + breathY, 6, 5, creatorState.hairColor);
+    putRect(cx - 2, cy - 14 + breathY, 4, 4, '#fcdcb4');
+
+    if (creatorState.gender === 'female') {
+      putRect(cx - 4, cy - 12 + breathY, 1, 6, creatorState.hairColor);
+      putRect(cx + 3, cy - 12 + breathY, 1, 6, creatorState.hairColor);
+    } else {
+      putRect(cx - 2, cy - 15 + breathY, 1, 1, creatorState.hairColor);
+      putRect(cx + 1, cy - 15 + breathY, 1, 1, creatorState.hairColor);
+    }
+
+    ctx.fillStyle = creatorState.eyeColor;
+    ctx.fillRect(Math.floor((cx - 1) * pw), Math.floor((cy - 13 + breathY) * ph), Math.ceil(pw), Math.ceil(ph));
+    ctx.fillRect(Math.floor((cx + 1) * pw), Math.floor((cy - 13 + breathY) * ph), Math.ceil(pw), Math.ceil(ph));
+
+    previewCanvasTimer = requestAnimationFrame(renderFrame);
+  }
+  renderFrame();
+}
+
+// ============================================================
+// ============================================================
+function openWindow(winId) {
+  if (currentActiveWindow) {
+    document.getElementById(currentActiveWindow).classList.remove('active');
+    const prevNav = document.querySelector(`[onclick="openWindow('${currentActiveWindow}')"]`);
+    if (prevNav) prevNav.classList.remove('active');
+  }
+
+  if (currentActiveWindow === winId) {
+    currentActiveWindow = null;
+    return;
+  }
+
+  document.getElementById(winId).classList.add('active');
+  const targetNav = document.querySelector(`[onclick="openWindow('${winId}')"]`);
+  if (targetNav) targetNav.classList.add('active');
+  currentActiveWindow = winId;
+
+  if (winId === 'win-shop') renderShop();
+  if (winId === 'win-quest') { renderMainQuests(); renderNormalQuests(); updateLinkOptions(); }
+  if (winId === 'win-bag') renderBag();
+  if (winId === 'win-closet') renderCloset();
+  if (winId === 'win-inventory') renderInventory();
+  if (winId === 'win-accounts') renderAccounts();
+}
+
+function closeWindow(winId) {
+  document.getElementById(winId).classList.remove('active');
+  const navBtn = document.querySelector(`[onclick="openWindow('${winId}')"]`);
+  if (navBtn) navBtn.classList.remove('active');
+  if (currentActiveWindow === winId) currentActiveWindow = null;
+}
+
+function toggleForm(formId) {
+  const form = document.getElementById(formId);
+  form.classList.toggle('active');
+}
+
+// ============================================================
+// ============================================================
+function getXPNeeded(lv) {
+  if (lv >= 100) return 999999;
+  return Math.floor(100 * Math.pow(lv, 1.4));
+}
+
+function getTitle(lv) {
+  const idx = Math.floor(lv / 10);
+  return HERO_TITLES[Math.min(idx, HERO_TITLES.length - 1)];
+}
+
+function getGraphicsTier(lv) {
+  if (lv < 10) return { name: '8-BIT CLASSIC', desc: '러프한 복고풍 클래식 도트', color: '#8892b0' };
+  if (lv < 20) return { name: '16-BIT RETRO 🌟', desc: '정밀한 디테일과 음영 가미', color: '#1abc9c' };
+  if (lv < 30) return { name: '32-BIT ARCADIA ⚡', desc: '화려한 명암 및 조명 빛내림 효과', color: 'var(--amber)' };
+  if (lv < 50) return { name: '64-BIT FANTASY 🔮', desc: '공기질 표현 및 다이나믹 조명', color: 'var(--purple)' };
+  if (lv < 70) return { name: '128-BIT LEGENDARY 👑', desc: '오라 및 반사 라이팅 텍스처', color: 'var(--amber-light)' };
+  if (lv < 100) return { name: 'HD PIXEL ARTIST ✨', desc: '한 땀 한 땀 마스터피스 도트 스케일', color: '#e74c3c' };
+  return { name: 'MASTERPIECE 3D-PIXEL 💎', desc: '한계를 극복한 초고해상도 픽셀 아우라', color: '#f1c40f' };
+}
+
+function checkUnlockedFeatures(lv) {
+  let text = '';
+  if (lv === 10) text = '🎉 레벨 10 달성! [모험가 헤어스타일 변경 & 악세사리 슬롯] 해금! 드레스룸에서 확인해보세요.';
+  if (lv === 40) text = '🐾 레벨 40 달성! [펫 시스템] 해금! 든든한 동반자 펫을 옷장에서 장착해보세요.';
+  if (lv === 60) text = '✨ 레벨 60 달성! [영혼의 아우라] 해금! 캐릭터 주위에 영롱한 기운이 돌기 시작합니다!';
+  if (lv === 80) text = '🐉 레벨 80 달성! [날개 파츠 - 드래곤 등날개] 해금! 거대 날개가 활성화됩니다.';
+  if (lv === 90) text = '🐊 레벨 90 달성! [전설의 드래곤 펫] 해금! 귀여운 아기용 펫을 소환할 수 있습니다.';
+  return text;
+}
+
+function updateHUD() {
+  if (!state.characterCreated) return;
+  const need = getXPNeeded(state.level);
+  const pct = Math.min((state.xp / need) * 100, 100);
+  
+  const rebirthPrefix = state.rebirthCount > 0 ? `[★${state.rebirthCount}] ` : '';
+  const charName = state.name || '무명용사';
+
+  document.getElementById('hero-display').innerText = `${rebirthPrefix}${charName} (LV.${state.level} ${getTitle(state.level)})`;
+  document.getElementById('gold-display').innerText = state.gold.toLocaleString();
+  document.getElementById('xp-bar').style.width = pct + '%';
+  document.getElementById('xp-text').innerText = `${state.xp} / ${need} XP`;
+
+  const tier = getGraphicsTier(state.level);
+  const tierEl = document.getElementById('graphics-tier');
+  tierEl.innerText = tier.name;
+  tierEl.style.color = tier.color;
+
+  const currentW = DEFAULT_ARMAMENTS.find(i => i.id === state.equippedWeapon);
+  const currentA = DEFAULT_ARMAMENTS.find(i => i.id === state.equippedArmor);
+  document.getElementById('spec-weapon').innerText = currentW ? currentW.name : '맨손';
+  document.getElementById('spec-armor').innerText = currentA ? currentA.name : '평상복';
+
+  if (state.level >= 10) {
+    document.getElementById('spec-accessory-pill').style.display = 'flex';
+    document.getElementById('spec-accessory').innerText = ACCESSORY_LIST[state.equippedAccessory]?.name || '없음';
+  } else {
+    document.getElementById('spec-accessory-pill').style.display = 'none';
+  }
+
+  if (state.level >= 40) {
+    document.getElementById('spec-pet-pill').style.display = 'flex';
+    document.getElementById('spec-pet').innerText = PET_LIST[state.equippedPet]?.name || '없음';
+  } else {
+    document.getElementById('spec-pet-pill').style.display = 'none';
+  }
+}
+
+function addXP(amount) {
+  if (!state.characterCreated) return;
+  if (state.level >= 100) return;
+
+  const multiplier = 1 + (state.rebirthCount * 0.15);
+  const boostedAmount = Math.round(amount * multiplier);
+
+  state.xp += boostedAmount;
+  
+  let currentNeed = getXPNeeded(state.level);
+  while (state.xp >= currentNeed && state.level < 100) {
+    state.xp -= currentNeed;
+    state.level++;
+    triggerLevelUp(state.level);
+    currentNeed = getXPNeeded(state.level);
+  }
+  
+  if (state.level >= 100 && !globalState.hasUnlockedSubAccounts) {
+    globalState.hasUnlockedSubAccounts = true;
+    saveState();
+  }
+
+  updateHUD();
+  saveState();
+}
+
+function addGold(amount) {
+  if (!state.characterCreated) return;
+  const multiplier = 1 + (state.rebirthCount * 0.15);
+  const boostedAmount = Math.round(amount * multiplier);
+
+  state.gold += boostedAmount;
+  updateHUD();
+  saveState();
+}
+
+function triggerLevelUp(lv) {
+  const tier = getGraphicsTier(lv);
+  const featureText = checkUnlockedFeatures(lv);
+  
+  let specialGiftText = '';
+  if (lv % 10 === 0) {
+    const bonusGold = lv * 10;
+    state.gold += bonusGold;
+    specialGiftText = `<div style="color:var(--emerald); font-weight:bold; margin-top:10px;">🎁 10레벨 단위 돌파 기념 보상: +${bonusGold}G 지급!</div>`;
+  }
+
+  let htmlBody = `
+    <div style="font-size: 50px; margin: 12px 0;">👑</div>
+    <div style="font-size: 22px; font-weight:bold; color:var(--amber);">LV.${lv} 달성</div>
+    <div style="color:var(--text-secondary); font-size:14px; margin-top:4px;">"${getTitle(lv)}" 위상에 오릅니다.</div>
+    <div style="font-size:13px; color:${tier.color}; margin-top:14px; font-weight:bold; border:1px solid ${tier.color}; padding:6px; border-radius:4px; background:rgba(0,0,0,0.4)">
+      그래픽 해상도 진화: ${tier.name}
+    </div>
+    <p style="font-size:11px; color:var(--text-dim); margin-top:4px;">"${tier.desc}"</p>
+    ${specialGiftText}
+  `;
+
+  if (featureText) {
+    htmlBody += `<div class="unlocked-benefit" style="margin-top:12px;">${featureText}</div>`;
+  }
+
+  triggerModal('⚡ 위대한 성장: 레벨 업! ⚡', htmlBody);
+  launchParticles('gold');
+}
+
+// ============================================================
+// ============================================================
+function triggerToast(msg, type = '') {
+  const t = document.getElementById('notif-toast');
+  t.innerText = msg;
+  t.style.display = 'block';
+  t.style.borderColor = type === 'emerald' ? 'var(--emerald)' : (type === 'crimson' ? 'var(--crimson)' : 'var(--border-medieval)');
+  t.style.color = type === 'emerald' ? 'var(--emerald)' : (type === 'crimson' ? 'var(--crimson)' : 'var(--amber-light)');
+  
+  setTimeout(() => {
+    t.style.display = 'none';
+  }, 3200);
+}
+
+function triggerModal(title, htmlBody) {
+  document.getElementById('modal-title').innerText = title;
+  document.getElementById('modal-body').innerHTML = htmlBody;
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+
+// ============================================================
+// ============================================================
+function addMainQuest() {
+  const input = document.getElementById('main-q-input');
+  const name = input.value.trim();
+  if (!name) { triggerToast('대장정 목표를 설정해주세요!'); return; }
+
+  const q = {
+    id: 'm_' + Date.now(),
+    name: name,
+    progress: 0,
+    isCleared: false
+  };
+
+  state.mainQuests.push(q);
+  input.value = '';
+  document.getElementById('form-main-quest').classList.remove('active');
+  saveState();
+  renderMainQuests();
+  updateLinkOptions();
+  triggerToast(`🐉 대장정 등록: ${name}`);
+}
+
+function addNormalQuest() {
+  const input = document.getElementById('normal-q-input');
+  const linkSelect = document.getElementById('normal-q-link');
+  const name = input.value.trim();
+  
+  if (!name) { triggerToast('수행 목적을 입력해 주세요!'); return; }
+  if (!selectedDiff) { triggerToast('의뢰 난이도를 지정해 주세요!'); return; }
+
+  const payMap = { low: { xp: 10, gold: 5 }, mid: { xp: 30, gold: 15 }, high: { xp: 60, gold: 30 } };
+  const rewards = payMap[selectedDiff];
+
+  const q = {
+    id: 'n_' + Date.now(),
+    name: name,
+    difficulty: selectedDiff,
+    linkedMain: linkSelect.value || null,
+    xp: rewards.xp,
+    gold: rewards.gold,
+    doneToday: false,
+    wasGreat: false
+  };
+
+  state.normalQuests.push(q);
+  input.value = '';
+  linkSelect.value = '';
+  selectedDiff = null;
+  resetDiffBtns();
+  document.getElementById('form-normal-quest').classList.remove('active');
+  saveState();
+  renderNormalQuests();
+  triggerToast(`📜 일일 의뢰 등록 완료: ${name}`);
+}
+
+function selectDifficulty(diff) {
+  selectedDiff = diff;
+  resetDiffBtns();
+  document.getElementById('diff-' + diff).className = 'btn-diff selected-' + diff;
+}
+
+function resetDiffBtns() {
+  ['low','mid','high'].forEach(d => {
+    document.getElementById('diff-' + d).className = 'btn-diff';
+  });
+}
+
+function updateLinkOptions() {
+  const s = document.getElementById('normal-q-link');
+  s.innerHTML = '<option value="">— 연동 없음 —</option>' +
+    state.mainQuests.filter(q => !q.isCleared).map(q => 
+      `<option value="${q.id}">${esc(q.name)}</option>`
+    ).join('');
+}
+
+function completeQuest(id, isGreatSuccess) {
+  const q = state.normalQuests.find(item => item.id === id);
+  if (!q || q.doneToday) return;
+
+  const mult = isGreatSuccess ? 2 : 1;
+  const finalXP = q.xp * mult;
+  const finalGold = q.gold * mult;
+
+  q.doneToday = true;
+  q.wasGreat = isGreatSuccess;
+  state.statQuests++;
+  if (isGreatSuccess) state.statGreat++;
+
+  addXP(finalXP);
+  addGold(finalGold);
+
+  if (q.linkedMain) {
+    const mainQ = state.mainQuests.find(m => m.id === q.linkedMain);
+    if (mainQ && !mainQ.isCleared) {
+      const step = isGreatSuccess ? 10 : 5;
+      mainQ.progress = Math.min(100, mainQ.progress + step);
+      if (mainQ.progress >= 100) {
+        mainQ.isCleared = true;
+        addXP(250);
+        addGold(150);
+        triggerModal('🏆 대장정 완수 선언! 🏆', 
+          `<div style="font-size:45px; margin-bottom:8px;">🐉</div>
+           <div style="font-size:18px; color:var(--amber-light); font-weight:bold;">"${mainQ.name}"</div>
+           <p style="font-size:13px; color:var(--text-secondary); margin-top:8px;">위대한 업적에 도달하여 특별 훈장 및 왕실 포상금을 수령했습니다!</p>
+           <div style="font-size:12px; color:var(--amber); margin-top:8px;">+250 XP | +150 Gold 💰</div>`
+        );
+        launchParticles('gold');
+      }
+    }
+  }
+
+  if (isGreatSuccess) {
+    launchParticles('great');
+    triggerToast(`🌟 대성공 판정! 버프 반영 골드 & 경험치 획득!`);
+  } else {
+    triggerToast(`✓ 의뢰 완수! 버프 반영 골드 & 경험치 획득!`, 'emerald');
+  }
+
+  saveState();
+  renderNormalQuests();
+  renderMainQuests();
+}
+
+function deleteNormal(id) {
+  state.normalQuests = state.normalQuests.filter(q => q.id !== id);
+  saveState();
+  renderNormalQuests();
+}
+
+function deleteMain(id) {
+  state.mainQuests = state.mainQuests.filter(q => q.id !== id);
+  state.normalQuests.forEach(nq => {
+    if (nq.linkedMain === id) nq.linkedMain = null;
+  });
+  saveState();
+  renderMainQuests();
+  renderNormalQuests();
+  updateLinkOptions();
+}
+
+function renderMainQuests() {
+  const container = document.getElementById('main-quests-container');
+  if (state.mainQuests.length === 0) {
+    container.innerHTML = '<div style="font-size:11px; font-style:italic; text-align:center; color:var(--text-dim); padding:10px;">수락된 메인 대장정이 없습니다.</div>';
+    return;
+  }
+
+  container.innerHTML = state.mainQuests.map(q => `
+    <div class="game-card main-card ${q.isCleared ? 'completed' : ''}">
+      <div class="card-top">
+        <div>
+          <div class="card-name">${q.isCleared ? '🏆 ' : '🛡️ '}${esc(q.name)}</div>
+          <div class="card-badges">
+            <span class="badge" style="border-color:var(--purple); color:var(--purple);">메인 퀘스트</span>
+            ${q.isCleared ? '<span class="badge b-low" style="color:var(--emerald); border-color:var(--emerald)">달성 완료</span>' : ''}
+          </div>
+        </div>
+        <button class="btn-card-del" onclick="deleteMain('${q.id}')">
+          ${PIXEL_SVGS.trash}
+        </button>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-desc">
+          <span>대장정 진척도</span>
+          <span>${q.progress}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width: ${q.progress}%;"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderNormalQuests() {
+  const container = document.getElementById('normal-quests-container');
+  if (state.normalQuests.length === 0) {
+    container.innerHTML = '<div style="font-size:11px; font-style:italic; text-align:center; color:var(--text-dim); padding:10px;">등록된 일일 의뢰가 없습니다.</div>';
+    return;
+  }
+
+  container.innerHTML = state.normalQuests.map(q => {
+    const parentMain = q.linkedMain ? state.mainQuests.find(m => m.id === q.linkedMain) : null;
+    const diffBadgeClass = `b-${q.difficulty}`;
+    const diffStr = { low: '하', mid: '중', high: '상' }[q.difficulty];
+
+    return `
+      <div class="game-card ${q.doneToday ? 'completed' : ''}">
+        <div class="card-top">
+          <div>
+            <div class="card-name">${esc(q.name)}</div>
+            <div class="card-badges">
+              <span class="badge ${diffBadgeClass}">${diffStr}급</span>
+              ${parentMain ? `<span class="badge b-link">🔗 ${esc(parentMain.name)}</span>` : ''}
+            </div>
+          </div>
+          <button class="btn-card-del" onclick="deleteNormal('${q.id}')">
+            ${PIXEL_SVGS.trash}
+          </button>
+        </div>
+        <div class="card-reward">기본 보상: <span>${q.xp}XP / ${q.gold}G</span></div>
+        
+        ${q.doneToday 
+          ? (q.wasGreat 
+              ? `<div class="card-stamp" style="color:var(--amber); border:1px dashed var(--amber); background:rgba(212,160,23,0.05)">✨ 오늘자 대성공 완료!</div>`
+              : `<div class="card-stamp">✓ 오늘자 의뢰 완수</div>`
+            )
+          : `<div class="card-actions">
+              <button class="btn-card-complete btn-card-normal" onclick="completeQuest('${q.id}', false)">일반 완료</button>
+              <button class="btn-card-complete btn-card-great" onclick="completeQuest('${q.id}', true)">대성공 완수 ✨</button>
+             </div>`
+        }
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// 옷장(Closet) 렌더러 - 헤어스타일 및 악세사리/펫 해금 완벽 관리
+// ============================================================
+function renderCloset() {
+  const container = document.getElementById('closet-content');
+  
+  const isCustomizationUnlocked = (state.level >= 100 || state.rebirthCount > 0);
+
+  let lockCoverHTML = '';
+  if (!isCustomizationUnlocked) {
+    lockCoverHTML = `
+      <div style="background: rgba(192, 57, 43, 0.1); border: 1px dashed var(--crimson); border-radius: 6px; padding: 10px; margin-bottom: 12px; font-size:11px; text-align:center; color: var(--text-primary);">
+        🔒 [ 성별, 머리색, 눈동자 색 변경 봉인 중 ]<br>
+        <span style="color: var(--text-secondary); font-size:10px;">레벨 100 달성 또는 환생에 성공한 전설의 모험가만 상시 성별과 기본 외형 변경이 가능합니다.</span>
+      </div>
+    `;
+  }
+
+  // 레벨 10+ 해금 헤어스타일 UI
+  let hairstyleHTML = '';
+  if (state.level >= 10) {
+    hairstyleHTML = `
+      <div class="section-header" style="margin-top: 15px;">💇‍♀️ 해금된 용사의 헤어스타일 (Style)</div>
+      <div class="custom-options" style="gap: 6px; margin-bottom: 12px;">
+        ${HAIR_STYLES.map(style => `
+          <button class="btn-opt ${state.equippedHairStyle === style.id ? 'active' : ''}" 
+                  onclick="equipClosetItem('equippedHairStyle', '${style.id}')" title="${style.desc}">
+            ${style.name}
+          </button>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    hairstyleHTML = `
+      <div class="section-header" style="margin-top: 15px;">💇‍♀️ 용사의 헤어스타일 (잠김)</div>
+      <div style="font-size:11px; color:var(--text-dim); text-align:center; padding:10px; border:1px dashed var(--border-medieval); border-radius:6px;">
+        🔒 레벨 10 달성 시 외형 변화가 뛰어난 특수 헤어스타일 선택 기능이 완전히 해금됩니다.
+      </div>
+    `;
+  }
+
+  let accessoryHTML = '';
+  if (state.level >= 10) {
+    accessoryHTML = `
+      <div class="section-header" style="margin-top: 15px;">👑 해금된 모험가 악세사리</div>
+      <div class="custom-options" style="gap: 6px; margin-bottom: 12px;">
+        ${Object.keys(ACCESSORY_LIST).map(key => {
+          const item = ACCESSORY_LIST[key];
+          const isLocked = state.level < item.reqLv;
+          const label = item.emoji + ' ' + item.name;
+          if (isLocked) {
+            return `<button class="btn-opt locked-option" disabled>${item.emoji} Lv.${item.reqLv} 해금</button>`;
+          }
+          return `
+            <button class="btn-opt ${state.equippedAccessory === key ? 'active' : ''}" onclick="equipClosetItem('equippedAccessory', '${key}')">
+              ${label}
+            </button>
+          `;
+        }).join('')}
+      </div>
+    `;
+  } else {
+    accessoryHTML = `
+      <div class="section-header" style="margin-top: 15px;">👑 모험가 악세사리 (잠김)</div>
+      <div style="font-size:11px; color:var(--text-dim); text-align:center; padding:10px; border:1px dashed var(--border-medieval); border-radius:6px;">
+        🔒 레벨 10 달성 시 머리장식/안경 파츠 슬롯이 자동으로 해금됩니다.
+      </div>
+    `;
+  }
+
+  let petHTML = '';
+  if (state.level >= 40) {
+    petHTML = `
+      <div class="section-header" style="margin-top: 15px;">🐾 해금된 동반자 펫</div>
+      <div class="custom-options" style="gap: 6px; margin-bottom: 12px;">
+        ${Object.keys(PET_LIST).map(key => {
+          const item = PET_LIST[key];
+          const isLocked = state.level < item.reqLv;
+          const label = item.emoji + ' ' + item.name;
+          if (isLocked) {
+            return `<button class="btn-opt locked-option" disabled>${item.emoji} Lv.${item.reqLv} 해금</button>`;
+          }
+          return `
+            <button class="btn-opt ${state.equippedPet === key ? 'active' : ''}" onclick="equipClosetItem('equippedPet', '${key}')">
+              ${label}
+            </button>
+          `;
+        }).join('')}
+      </div>
+    `;
+  } else {
+    petHTML = `
+      <div class="section-header" style="margin-top: 15px;">🐾 동반자 펫 (잠김)</div>
+      <div style="font-size:11px; color:var(--text-dim); text-align:center; padding:10px; border:1px dashed var(--border-medieval); border-radius:6px;">
+        🔒 레벨 40 달성 시 든든한 일일 펫 소환 슬롯이 자동으로 해금됩니다.
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    ${lockCoverHTML}
+
+    <div class="section-header">🧬 모험가 성별 및 아바타 기본 베이스</div>
+    <div class="custom-options" style="gap:6px; margin-bottom:12px;">
+      <button class="btn-opt ${state.gender === 'male' ? 'active' : ''}" ${!isCustomizationUnlocked ? 'disabled' : ''} onclick="equipClosetItem('gender', 'male')">남성 전사</button>
+      <button class="btn-opt ${state.gender === 'female' ? 'active' : ''}" ${!isCustomizationUnlocked ? 'disabled' : ''} onclick="equipClosetItem('gender', 'female')">여성 마법사</button>
+    </div>
+
+    <div class="section-header">🎨 머리카락 색 변경</div>
+    <div class="custom-options" style="gap: 6px; margin-bottom: 12px;">
+      ${HAIR_COLORS.map(c => `
+        <button class="btn-opt ${state.hairColor === c.value ? 'active' : ''}" ${!isCustomizationUnlocked ? 'disabled' : ''} onclick="equipClosetItem('hairColor', '${c.value}')" style="border-bottom:3px solid ${c.value}">
+          ${c.name}
+        </button>
+      `).join('')}
+    </div>
+
+    <div class="section-header">👁️ 눈동자 컬러 렌즈</div>
+    <div class="custom-options" style="gap: 6px; margin-bottom: 12px;">
+      ${EYE_COLORS.map(c => `
+        <button class="btn-opt ${state.eyeColor === c.value ? 'active' : ''}" ${!isCustomizationUnlocked ? 'disabled' : ''} onclick="equipClosetItem('eyeColor', '${c.value}')" style="border-bottom:3px solid ${c.value}">
+          ${c.name}
+        </button>
+      `).join('')}
+    </div>
+
+    ${hairstyleHTML}
+
+    <div class="section-header">🥋 일상 상의 코디 변경</div>
+    <div class="custom-options" style="gap: 6px; margin-bottom: 12px;">
+      ${TOP_OUTFITS.map(t => `
+        <button class="btn-opt ${state.topOutfit === t.id ? 'active' : ''}" onclick="equipClosetItem('topOutfit', '${t.id}')">
+          ${t.name}
+        </button>
+      `).join('')}
+    </div>
+
+    <div class="section-header">👖 일상 하의 코디 변경</div>
+    <div class="custom-options" style="gap: 6px; margin-bottom: 12px;">
+      ${BOTTOM_OUTFITS.map(b => `
+        <button class="btn-opt ${state.bottomOutfit === b.id ? 'active' : ''}" onclick="equipClosetItem('bottomOutfit', '${b.id}')">
+          ${b.name}
+        </button>
+      `).join('')}
+    </div>
+
+    <div class="section-header">👞 아바타 신발 변경</div>
+    <div class="custom-options" style="gap: 6px; margin-bottom: 12px;">
+      ${SHOES_OUTFITS.map(s => `
+        <button class="btn-opt ${state.shoesOutfit === s.id ? 'active' : ''}" onclick="equipClosetItem('shoesOutfit', '${s.id}')">
+          ${s.name}
+        </button>
+      `).join('')}
+    </div>
+
+    ${accessoryHTML}
+    ${petHTML}
+  `;
+}
+
+function equipClosetItem(key, val) {
+  state[key] = val;
+  saveState();
+  renderCloset();
+  updateHUD();
+  drawTown();
+  triggerToast('👗 외형 설정 변경이 완전히 적용되었습니다!');
+}
+
+// ============================================================
+// ============================================================
+function renderInventory() {
+  const wpContainer = document.getElementById('inv-weapons-container');
+  const arContainer = document.getElementById('inv-armors-container');
+
+  const weapons = DEFAULT_ARMAMENTS.filter(i => i.type === 'weapon' && state.ownedItems.includes(i.id));
+  const armors = DEFAULT_ARMAMENTS.filter(i => i.type === 'armor' && state.ownedItems.includes(i.id));
+
+  const rarityColors = { common: '#bbb', uncommon: 'var(--emerald)', rare: '#4a90e2', legendary: 'var(--amber)', mythic: '#a569bd' };
+
+  wpContainer.innerHTML = weapons.map(item => {
+    const isEquipped = state.equippedWeapon === item.id;
+    return `
+      <div class="shop-card">
+        <div class="shop-icon-wrapper">${PIXEL_SVGS[item.icon]}</div>
+        <div class="shop-info">
+          <div class="shop-name" style="color:${rarityColors[item.rarity]}">${item.name} ${isEquipped ? '<span style="font-size:10px;color:var(--emerald)">(장착됨)</span>' : ''}</div>
+          <div class="shop-desc">${item.desc}</div>
+        </div>
+        <div>
+          ${isEquipped 
+            ? `<button class="btn-shop-action equipped">장착중</button>` 
+            : `<button class="btn-shop-action" onclick="equipInInventory('weapon', '${item.id}')">장착</button>`}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  arContainer.innerHTML = armors.map(item => {
+    const isEquipped = state.equippedArmor === item.id;
+    return `
+      <div class="shop-card">
+        <div class="shop-icon-wrapper">${PIXEL_SVGS[item.icon]}</div>
+        <div class="shop-info">
+          <div class="shop-name" style="color:${rarityColors[item.rarity]}">${item.name} ${isEquipped ? '<span style="font-size:10px;color:var(--emerald)">(장착됨)</span>' : ''}</div>
+          <div class="shop-desc">${item.desc}</div>
+        </div>
+        <div>
+          ${isEquipped 
+            ? `<button class="btn-shop-action equipped">장착중</button>` 
+            : `<button class="btn-shop-action" onclick="equipInInventory('armor', '${item.id}')">장착</button>`}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function equipInInventory(type, id) {
+  if (type === 'weapon') state.equippedWeapon = id;
+  if (type === 'armor') state.equippedArmor = id;
+  saveState();
+  renderInventory();
+  updateHUD();
+  drawTown();
+  triggerToast('🎒 장비 장착 변경이 승인되었습니다!');
+}
+
+// ============================================================
+// ============================================================
+function renderShop() {
+  const shopContainer = document.getElementById('equipment-shop-container');
+  const items = DEFAULT_ARMAMENTS.filter(item => item.id !== 'w0' && item.id !== 'a0');
+
+  shopContainer.innerHTML = items.map(item => {
+    const isOwned = state.ownedItems.includes(item.id);
+    const canBuy = state.gold >= item.price;
+    const rarityColors = { common: '#bbb', uncommon: 'var(--emerald)', rare: '#4a90e2', legendary: 'var(--amber)', mythic: '#a569bd' };
+
+    let actionBtn = '';
+    if (isOwned) {
+      actionBtn = `<button class="btn-shop-action equipped" style="color:var(--text-dim); border-color:var(--text-dim);">보유 중</button>`;
+    } else {
+      if (canBuy) {
+        actionBtn = `<button class="btn-shop-action" onclick="buyArmament('${item.id}')" style="border-color:var(--amber); color:var(--amber-light);">${item.price} G</button>`;
+      } else {
+        actionBtn = `<button class="btn-shop-action" style="opacity:0.5; cursor:not-allowed;">${item.price} G 부족</button>`;
+      }
+    }
+
+    return `
+      <div class="shop-card">
+        <div class="shop-icon-wrapper">${PIXEL_SVGS[item.icon]}</div>
+        <div class="shop-info">
+          <div class="shop-name" style="color:${rarityColors[item.rarity]}">${item.name} [${item.rarity.toUpperCase()}]</div>
+          <div class="shop-desc">${item.desc}</div>
+        </div>
+        <div>${actionBtn}</div>
+      </div>
+    `;
+  }).join('');
+
+  renderCustomRewards();
+}
+
+function buyArmament(itemId) {
+  const item = DEFAULT_ARMAMENTS.find(i => i.id === itemId);
+  if (!item || state.ownedItems.includes(itemId)) return;
+
+  if (state.gold < item.price) {
+    triggerToast('보유 골드가 모자랍니다!');
+    return;
+  }
+
+  state.gold -= item.price;
+  state.ownedItems.push(itemId);
+  logPurchase(item.name, item.price);
+  
+  if (item.type === 'weapon') state.equippedWeapon = itemId;
+  else state.equippedArmor = itemId;
+
+  saveState();
+  renderShop();
+  updateHUD();
+  drawTown();
+  triggerToast(`⚔️ 무장 구매 및 자동 장착 완료: ${item.name}`, 'emerald');
+}
+
+function addCustomReward() {
+  const nameInput = document.getElementById('reward-input-name');
+  const goldInput = document.getElementById('reward-input-gold');
+  const name = nameInput.value.trim();
+  const gold = parseInt(goldInput.value);
+
+  if (!name || isNaN(gold) || gold <= 0) {
+    triggerToast('보상물 명칭과 요구 골드를 바르게 적어주세요!');
+    return;
+  }
+
+  const r = { id: 'r_' + Date.now(), name, price: gold };
+  state.customRewards.push(r);
+  nameInput.value = '';
+  goldInput.value = '';
+  document.getElementById('form-custom-reward').classList.remove('active');
+  saveState();
+  renderCustomRewards();
+  triggerToast(`🎁 커스텀 휴식 상품 등록: ${name}`);
+}
+
+function deleteCustomReward(id) {
+  state.customRewards = state.customRewards.filter(r => r.id !== id);
+  saveState();
+  renderCustomRewards();
+}
+
+function buyCustomReward(id) {
+  const r = state.customRewards.find(item => item.id === id);
+  if (!r) return;
+
+  if (state.gold < r.price) {
+    triggerToast('소지한 골드가 부족하여 구매할 수 없습니다.');
+    return;
+  }
+
+  state.gold -= r.price;
+  logPurchase(`[현실 보상] ${r.name}`, r.price);
+  saveState();
+  renderCustomRewards();
+  updateHUD();
+  triggerToast(`🎉 전리품 수령! 휴식을 권장합니다: ${r.name}`, 'emerald');
+}
+
+function renderCustomRewards() {
+  const container = document.getElementById('custom-rewards-container');
+  if (state.customRewards.length === 0) {
+    container.innerHTML = '<div style="font-size:11px; font-style:italic; text-align:center; color:var(--text-dim); padding:10px;">등록된 자율 현실 휴식 상용품이 없습니다.</div>';
+    return;
+  }
+
+  container.innerHTML = state.customRewards.map(r => {
+    const isAffordable = state.gold >= r.price;
+    return `
+      <div class="shop-card">
+        <div class="shop-icon-wrapper">${PIXEL_SVGS.gift}</div>
+        <div class="shop-info">
+          <div class="shop-name">${esc(r.name)}</div>
+          <div class="shop-desc">스스로 부여하는 모험 전리품 보상.</div>
+        </div>
+        <div style="display:flex; gap:4px; align-items:center;">
+          <div style="font-size:11px; font-weight:bold; color:var(--amber); margin-right:4px;">${r.price}G</div>
+          ${isAffordable 
+            ? `<button class="btn-shop-action" onclick="buyCustomReward('${r.id}')" style="border-color:var(--emerald); color:var(--emerald)">소모</button>`
+            : `<button class="btn-shop-action" style="opacity:0.5; cursor:not-allowed;">불가</button>`
+          }
+          <button class="btn-card-del" onclick="deleteCustomReward('${r.id}')">
+            ${PIXEL_SVGS.trash}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function logPurchase(name, cost) {
+  const dateStr = new Date().toLocaleDateString('ko-KR');
+  state.purchaseHistory.unshift({ name, cost, date: dateStr });
+  if (state.purchaseHistory.length > 15) state.purchaseHistory.pop();
+}
+
+function renderBag() {
+  document.getElementById('stat-total-q').innerText = state.statQuests;
+  document.getElementById('stat-total-great').innerText = state.statGreat;
+
+  const container = document.getElementById('purchase-history-container');
+  if (state.purchaseHistory.length === 0) {
+    container.innerHTML = '<div style="font-size:11px; font-style:italic; text-align:center; color:var(--text-dim); padding:10px;">교환된 상점 기록이 존재하지 않습니다.</div>';
+    return;
+  }
+
+  container.innerHTML = state.purchaseHistory.map(log => `
+    <div class="shop-card" style="padding:6px 10px;">
+      <div style="font-size:16px;">🪙</div>
+      <div class="shop-info">
+        <div class="shop-name" style="font-size:11px;">${esc(log.name)}</div>
+        <div class="shop-desc" style="font-size:9px;">거래 일시: ${log.date}</div>
+      </div>
+      <div style="font-family:'Cinzel'; color:var(--crimson); font-size:11px; font-weight:bold;">-${log.cost} G</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// 계정 슬롯 및 환생 UI 렌더러
+// ============================================================
+function renderAccounts() {
+  const rebirthContainer = document.getElementById('rebirth-action-container');
+  const currentBuff = state.rebirthCount * 15;
+
+  if (state.level >= 100) {
+    rebirthContainer.innerHTML = `
+      <div style="margin-top: 10px;">
+        <div style="font-size: 11px; color: var(--emerald); margin-bottom: 6px; text-align:center;">
+          ✨ 만렙 용사의 자격을 완비했습니다! 영혼의 대환생을 행할 수 있습니다.
+        </div>
+        <button class="btn-primary" style="background: linear-gradient(180deg, var(--emerald) 0%, var(--emerald-dim) 100%); border-color: var(--emerald);" onclick="executeRebirth()">
+          🌀 윤회의 끈 돌려 환생하기 (+15% 획득 보너스 영구 가산)
+        </button>
+      </div>
+    `;
+  } else {
+    rebirthContainer.innerHTML = `
+      <div style="margin-top: 10px; font-size:11px; color: var(--text-dim); text-align:center; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px;">
+        🔒 만렙(LV.100) 도달 시 환생 제단이 활성화됩니다. (현재 레벨: LV.${state.level})<br>
+        <span style="color:var(--emerald); font-size:10px;">* 현재 환생 계정 버프 혜택: 골드 및 XP 획득량 <b>+${currentBuff}%</b> 가산</span>
+      </div>
+    `;
+  }
+
+  const slotsContainer = document.getElementById('accounts-slots-container');
+  let slotsHTML = '';
+
+  const slotKeys = ['slot_1', 'slot_2', 'slot_3'];
+  const hasUnlock = globalState.hasUnlockedSubAccounts;
+
+  slotKeys.forEach((key, idx) => {
+    const isCurrent = globalState.currentSlot === key;
+    const charData = globalState.slots[key];
+    const slotNum = idx + 1;
+
+    if (idx > 0 && !hasUnlock) {
+      slotsHTML += `
+        <div class="slot-card locked">
+          <div>
+            <div style="font-size: 13px; font-weight: bold;">🔒 용사 슬롯 ${slotNum} (잠김)</div>
+            <div style="font-size: 10px; color: var(--text-dim); margin-top:3px;">계정 내 아무 용사나 레벨 100 달성 시 부계정 슬롯 해금</div>
+          </div>
+        </div>
+      `;
+    } else {
+      if (!charData || !charData.characterCreated) {
+        slotsHTML += `
+          <div class="slot-card" onclick="createNewCharacterInSlot('${key}')">
+            <div>
+              <div style="font-size: 13px; font-weight: bold; color: var(--amber-light);">➕ 신규 용사 모집하기 (슬롯 ${slotNum})</div>
+              <div style="font-size: 10px; color: var(--text-secondary); margin-top:3px;">비어있음 - 클릭하여 새로운 아바타로 모험 출발</div>
+            </div>
+          </div>
+        `;
+      } else {
+        const rebirthSuffix = charData.rebirthCount > 0 ? ` <span style="color:var(--emerald)">★${charData.rebirthCount}</span>` : '';
+        slotsHTML += `
+          <div class="slot-card ${isCurrent ? 'active' : ''}" onclick="switchAccountSlot('${key}')">
+            <div>
+              <div style="font-size: 13px; font-weight: bold; color: var(--text-primary);">${rebirthSuffix} ${esc(charData.name)}</div>
+              <div style="font-size: 10px; color: var(--text-secondary); margin-top:3px;">LV.${charData.level} ${getTitle(charData.level)} | 보유 골드: ${charData.gold}G</div>
+            </div>
+            ${isCurrent 
+              ? `<span style="font-size: 11px; color: var(--emerald); font-weight:bold;">⚔️ 활성 플레이 중</span>`
+              : `<span style="font-size: 11px; color: var(--text-dim);">[클릭시 교체]</span>`
+            }
+          </div>
+        `;
+      }
+    }
+  });
+
+  slotsContainer.innerHTML = slotsHTML;
+}
+
+function createNewCharacterInSlot(slotKey) {
+  targetSlotToCreate = slotKey;
+  
+  if (currentActiveWindow) {
+    document.getElementById(currentActiveWindow).classList.remove('active');
+    currentActiveWindow = null;
+  }
+  
+  creatorState = {
+    gender: 'male',
+    hairColor: '#4a2306',
+    eyeColor: '#2980b9',
+    topOutfit: 't_fantasy_classic',
+    bottomOutfit: 'b_fantasy_pants',
+    shoesOutfit: 's_fantasy_leather'
+  };
+  initCreatorScreen();
+}
+
+function switchAccountSlot(slotKey) {
+  if (globalState.currentSlot === slotKey) return;
+  
+  saveState();
+  
+  globalState.currentSlot = slotKey;
+  state = globalState.slots[slotKey];
+  
+  saveState();
+  
+  updateHUD();
+  drawTown();
+  
+  renderAccounts();
+  if (currentActiveWindow === 'win-closet') renderCloset();
+  if (currentActiveWindow === 'win-inventory') renderInventory();
+  if (currentActiveWindow === 'win-quest') { renderMainQuests(); renderNormalQuests(); updateLinkOptions(); }
+  if (currentActiveWindow === 'win-shop') renderShop();
+  
+  triggerToast(`👥 용사 [${state.name}]의 영혼으로 빙의하여 접속했습니다.`, 'emerald');
+}
+
+function executeRebirth() {
+  if (state.level < 100) return;
+
+  const charName = state.name || '무명용사';
+
+  const rebirthConfirmBody = `
+    <div style="text-align:center;">
+      <div style="font-size:45px; margin-bottom:8px;">🌀</div>
+      <div style="font-size:15px; color:var(--amber-light); font-weight:bold;">용사 [${charName}]의 대환생 선언</div>
+      <p style="font-size:11px; color:var(--text-secondary); margin-top:8px; text-align:left; line-height:1.5;">
+        환생 제단을 작동시키면 다음 효과를 영구히 획득합니다:<br>
+        <span style="color:var(--emerald);">✔ 영구 획득 골드 및 XP 보너스 +15% 누적 가산</span><br>
+        <span style="color:var(--emerald);">✔ 이름 옆에 성과 메달 훈장 가산</span><br>
+        <span style="color:var(--emerald);">✔ 무기, 갑옷, 골드, 현실 휴식 보상 목록 전체 보존</span><br><br>
+        <span style="color:var(--crimson); font-weight:bold;">⚠️ 의뢰 목록과 캐릭터 레벨(LV.1)은 신화적 균형을 위해 초기화됩니다.</span>
+      </p>
+      <button class="btn-primary" style="margin-top:12px; background:linear-gradient(180deg, var(--emerald) 0%, var(--emerald-dim) 100%); border-color:var(--emerald);" onclick="confirmRebirthAndReset()">
+        의식을 거행하겠습니다. (환생 확정)
+      </button>
+    </div>
+  `;
+  triggerModal('🔮 윤회의 대제단 작동', rebirthConfirmBody);
+}
+
+function confirmRebirthAndReset() {
+  closeModal();
+
+  state.rebirthCount++;
+  state.level = 1;
+  state.xp = 0;
+  state.equippedHairStyle = 'style_1'; // 환생 시 기본 헤어로 순환
+
+  state.mainQuests = [];
+  state.normalQuests = [];
+
+  saveState();
+  updateHUD();
+  drawTown();
+  renderAccounts();
+  launchParticles('gold');
+
+  triggerModal('👑 환생 성공! 👑', `
+    <div style="font-size:50px; margin: 12px 0;">✨</div>
+    <div style="font-size: 18px; font-weight:bold; color:var(--emerald);">전설의 훈장 [★${state.rebirthCount}] 수여 완료</div>
+    <p style="font-size:12px; color:var(--text-secondary); margin-top:8px;">
+      새로운 아기로 환생했지만 소울에 깃든 대륙의 가호로 인해<br>
+      <b>앞으로 얻는 골드 및 XP 획득량이 기본 배율보다 ${state.rebirthCount * 15}% 향상됩니다!</b>
+    </p>
+  `);
+}
+
+// ============================================================
+// ============================================================
+const PALETTES = {
+  void: 'transparent',
+  floor: '#161928',
+  brick: '#20263f',
+  brickLt: '#2a3150',
+  brickDk: '#101423',
+  curtain: '#5d0f1d',
+  curtainDk: '#3a0812',
+  windowBack: '#14223d',
+  windowRim: '#2d3e5e',
+  characterSkin: '#fcdcb4',
+  shadow: 'rgba(0,0,0,0.45)'
+};
+
+const EQUIPMENT_RENDER_THEMES = {
+  w0: { color: '#8e5e38', l: 6 },
+  w1: { color: '#bdc3c7', l: 5 },
+  w2: { color: '#7f8c8d', l: 8 },
+  w3: { color: '#e74c3c', l: 9 },
+  w4: { color: '#f1c40f', l: 11 },
+  a0: { body: '#34495e', shadow: '#2c3e50' },
+  a1: { body: '#d35400', shadow: '#a04000' },
+  a2: { body: '#7f8c8d', shadow: '#626567' },
+  a3: { body: '#ecf0f1', shadow: '#bdc3c7' }
+};
+
+let frameTick = 0;
+
+function drawTown() {
+  if (!state.characterCreated) return;
+  const canvas = document.getElementById('town-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentNode.getBoundingClientRect();
+  
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+
+  const gridW = 100;
+  const gridH = 100;
+  
+  const pw = canvas.width / gridW;
+  const ph = canvas.height / gridH;
+
+  function put(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.floor(x * pw), Math.floor(y * ph), Math.ceil(pw), Math.ceil(ph));
+  }
+
+  function putRect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.floor(x * pw), Math.floor(y * ph), Math.ceil(w * pw), Math.ceil(h * ph));
+  }
+
+  let wallColor = PALETTES.brick;
+  let wallLtColor = PALETTES.brickLt;
+  let wallDkColor = PALETTES.brickDk;
+
+  if (state.level >= 50) {
+    wallColor = '#1f3a52';
+    wallLtColor = '#345575';
+    wallDkColor = '#0f2233';
+  } else if (state.level >= 20) {
+    wallColor = '#161925';
+    wallLtColor = '#292e42';
+    wallDkColor = '#0b0c12';
+  }
+
+  putRect(0, 0, gridW, gridH, wallColor);
+
+  let brickRows = state.level < 10 ? 8 : (state.level < 30 ? 14 : 22);
+  let brickCols = state.level < 10 ? 6 : (state.level < 30 ? 11 : 16);
+  let rowHeight = Math.floor(100 / brickRows);
+  let colWidth = Math.floor(100 / brickCols);
+
+  for (let r = 0; r < brickRows; r++) {
+    const shift = (r % 2 === 0) ? 0 : Math.floor(colWidth / 2);
+    for (let c = 0; c < brickCols + 1; c++) {
+      const bx = c * colWidth - shift;
+      const by = r * rowHeight;
+      putRect(bx, by, colWidth - 1, rowHeight - 1, wallDkColor);
+      if (state.level >= 10) {
+        putRect(bx, by, colWidth - 1, 1, wallLtColor);
+        putRect(bx, by, 1, rowHeight - 1, wallLtColor);
+      }
+    }
+  }
+
+  const winX = 35;
+  const winY = 12;
+  const winW = 30;
+  const winH = 38;
+
+  putRect(winX - 1, winY - 1, winW + 2, winH + 2, PALETTES.windowRim);
+  putRect(winX, winY, winW, winH, PALETTES.windowBack);
+
+  putRect(winX + Math.floor(winW/2) - 1, winY, 2, winH, PALETTES.windowRim);
+  putRect(winX, winY + Math.floor(winH/2) - 1, winW, 2, PALETTES.windowRim);
+
+  if (state.level >= 30) {
+    putRect(winX + Math.floor(winW/4) - 1, winY, 1, winH, '#1c2d47');
+    putRect(winX + Math.floor((winW*3)/4) - 1, winY, 1, winH, '#1c2d47');
+  }
+
+  const rayPulse = 0.15 + Math.sin(frameTick * 0.05) * 0.05;
+  ctx.fillStyle = state.level >= 50 ? `rgba(212, 160, 23, ${rayPulse})` : `rgba(133, 193, 233, ${rayPulse})`;
+  ctx.beginPath();
+  
+  ctx.moveTo(Math.floor((winX + 4) * pw), Math.floor(winY * ph));
+  ctx.lineTo(Math.floor((winX + 16) * pw), Math.floor(winY * ph));
+  ctx.lineTo(Math.floor((winX + 28) * pw), Math.floor((winY + winH + 25) * ph));
+  ctx.lineTo(Math.floor((winX + 6) * pw), Math.floor((winY + winH + 25) * ph));
+  ctx.closePath();
+  ctx.fill();
+
+  let floorCol = PALETTES.floor;
+  if (state.level >= 50) floorCol = '#0d131a';
+  else if (state.level >= 20) floorCol = '#111522';
+
+  putRect(0, gridH - 18, gridW, 18, floorCol);
+  
+  let tileGap = state.level < 10 ? 15 : (state.level < 30 ? 10 : 6);
+  for (let tx = 0; tx < 100 / tileGap; tx++) {
+    putRect(tx * tileGap, gridH - 18, 1, 18, '#1c2033');
+    putRect(0, gridH - 18 + (tx * 2), gridW, 1, '#151828');
+  }
+
+  putRect(0, 0, 10, gridH, PALETTES.curtainDk);
+  putRect(0, 0, 2, gridH, PALETTES.curtain);
+  for (let cy = 0; cy < 10; cy++) {
+    putRect(1, cy * 10 + 2, 7, 3, PALETTES.curtain);
+  }
+
+  putRect(gridW - 10, 0, 10, gridH, PALETTES.curtainDk);
+  putRect(gridW - 2, 0, 2, gridH, PALETTES.curtain);
+  for (let cy = 0; cy < 10; cy++) {
+    putRect(gridW - 8, cy * 10 + 2, 7, 3, PALETTES.curtain);
+  }
+
+  const pedW = 28;
+  const pedH = 10;
+  const pedX = Math.floor((gridW - pedW) / 2);
+  const pedY = gridH - 24;
+
+  let pedTopCol = '#424949';
+  let pedBodyCol = '#2c3e50';
+  if (state.level >= 50) { pedTopCol = 'var(--amber)'; pedBodyCol = '#7a5010'; }
+
+  putRect(pedX + 2, pedY, pedW - 4, 3, pedTopCol);
+  putRect(pedX + 1, pedY + 3, pedW - 2, pedH - 3, pedBodyCol);
+  putRect(pedX, pedY + 2, pedW, 1, '#34495e');
+
+  if (state.level >= 20) {
+    putRect(pedX + 8, pedY + 5, 12, 1, 'var(--border-medieval-glow)');
+    putRect(pedX + 13, pedY + 4, 2, 3, 'var(--border-medieval-glow)');
+  }
+
+  drawWallTorch(put, putRect, 16, 25, frameTick);
+  drawWallTorch(put, putRect, gridW - 19, 25, frameTick);
+
+  drawCharacterPixel(ctx, put, putRect, gridW, gridH, frameTick, pw, ph);
+}
+
+function drawWallTorch(put, putRect, tx, ty, tick) {
+  putRect(tx + 1, ty + 5, 1, 6, '#34495e');
+  putRect(tx, ty + 4, 3, 2, '#2c3e50');
+
+  const fireFlicker = Math.sin(tick * 0.2 + tx) > 0;
+  putRect(tx + 1, ty, 1, 4, fireFlicker ? '#e67e22' : '#f1c40f');
+  put(tx, ty + 1, fireFlicker ? '#f39c12' : '#d35400');
+  put(tx + 2, ty + 1, fireFlicker ? '#f1c40f' : '#e67e22');
+  put(tx + 1, ty - 1, fireFlicker ? '#fff' : '#f1c40f');
+}
+
+// ============================================================
+// 캐릭터 및 해금된 💇‍♀️ 헤어 스타일 정밀 2D Canvas 드로잉
+// ============================================================
+function drawCharacterPixel(ctx, put, putRect, gridW, gridH, tick, pw, ph) {
+  const cx = Math.floor(gridW / 2);
+  const cy = gridH - 23;
+
+  const breathY = Math.floor(Math.sin(tick * 0.08) * 1.3);
+
+  const skin = PALETTES.characterSkin;
+  const hair = state.hairColor || '#4a2306';
+  const eye = state.eyeColor || '#2c3e50';
+  const shadow = PALETTES.shadow;
+
+  putRect(cx - 6, cy + 1, 12, 1, shadow);
+
+  const currentTop = TOP_OUTFITS.find(t => t.id === state.topOutfit) || TOP_OUTFITS[0];
+  const currentBottom = BOTTOM_OUTFITS.find(b => b.id === state.bottomOutfit) || BOTTOM_OUTFITS[0];
+  const currentShoes = SHOES_OUTFITS.find(s => s.id === state.shoesOutfit) || SHOES_OUTFITS[0];
+
+  let legColor = currentBottom.color;
+  let footColor = currentShoes.color;
+  let bodyColor = currentTop.color;
+  let trimColor = currentTop.shadow;
+
+  if (state.equippedArmor !== 'a0') {
+    const armorTheme = EQUIPMENT_RENDER_THEMES[state.equippedArmor] || EQUIPMENT_RENDER_THEMES['a0'];
+    legColor = armorTheme.shadow;
+    footColor = '#111';
+    bodyColor = armorTheme.body;
+    trimColor = armorTheme.shadow;
+  }
+
+  // 60레벨 이상 아우라 이펙트
+  if (state.level >= 60 || state.rebirthCount > 0) {
+    const auraPulse = 0.2 + Math.abs(Math.sin(tick * 0.05)) * 0.2;
+    ctx.fillStyle = state.rebirthCount > 0 ? `rgba(241, 196, 15, ${auraPulse})` : `rgba(155, 89, 182, ${auraPulse})`;
+    ctx.beginPath();
+    ctx.arc(cx * pw, (cy - 7 + breathY) * ph, 14 * pw, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 80레벨 이상 등날개
+  if (state.level >= 80 && state.equippedAccessory === 'wings') {
+    const wingSwing = Math.floor(Math.sin(tick * 0.1) * 1.5);
+    putRect(cx - 9, cy - 14 + breathY + wingSwing, 5, 4, '#1b1b1b');
+    putRect(cx - 11, cy - 12 + breathY + wingSwing, 3, 2, 'var(--crimson)');
+    putRect(cx + 5, cy - 14 + breathY + wingSwing, 5, 4, '#1b1b1b');
+    putRect(cx + 9, cy - 12 + breathY + wingSwing, 3, 2, 'var(--crimson)');
+  }
+
+  const hairStyleId = state.equippedHairStyle || 'style_1';
+
+  // ============================================================
+  // LEVEL 1~9: 8-BIT CLASSIC STYLE
+  // ============================================================
+  if (state.level < 10) {
+    putRect(cx - 2, cy - 1, 1, 2, legColor);
+    putRect(cx + 1, cy - 1, 1, 2, legColor);
+    putRect(cx - 3, cy, 2, 1, footColor);
+    putRect(cx + 1, cy, 2, 1, footColor);
+
+    putRect(cx - 3, cy - 8 + breathY, 6, 7, bodyColor);
+
+    putRect(cx - 2, cy - 13 + breathY, 4, 5, hair);
+    putRect(cx - 1, cy - 12 + breathY, 3, 3, skin);
+    put(cx - 1, cy - 11 + breathY, eye);
+    put(cx + 1, cy - 11 + breathY, eye);
+
+    putRect(cx - 4, cy - 8 + breathY, 1, 4, bodyColor);
+    put(cx - 4, cy - 4 + breathY, skin);
+    putRect(cx + 3, cy - 8 + breathY, 1, 4, bodyColor);
+    put(cx + 4, cy - 4 + breathY, skin);
+
+  // ============================================================
+  // LEVEL 10~29: 16-BIT RETRO STYLE
+  // ============================================================
+  } else if (state.level < 30) {
+    putRect(cx - 3, cy - 2, 2, 3, legColor);
+    putRect(cx + 1, cy - 2, 2, 3, legColor);
+    putRect(cx - 4, cy, 2, 1, footColor);
+    putRect(cx + 2, cy, 2, 1, footColor);
+
+    putRect(cx - 4, cy - 10 + breathY, 8, 8, bodyColor);
+    putRect(cx - 4, cy - 5 + breathY, 8, 1, trimColor);
+    
+    // 헤어스타일 렌더러 분기
+    if (hairStyleId === 'style_2') {
+      // 와일드 기사 헤어 (삐죽형)
+      putRect(cx - 3, cy - 14 + breathY, 6, 4, hair);
+      put(cx - 2, cy - 15 + breathY, hair);
+      put(cx, cy - 15 + breathY, hair);
+      put(cx + 2, cy - 15 + breathY, hair);
+      putRect(cx - 2, cy - 13 + breathY, 4, 3, skin);
+    } else if (hairStyleId === 'style_3') {
+      // 땋은 트윈테일 (양갈래)
+      putRect(cx - 3, cy - 14 + breathY, 6, 4, hair);
+      putRect(cx - 4, cy - 12 + breathY, 1, 4, hair);
+      putRect(cx + 3, cy - 12 + breathY, 1, 4, hair);
+      putRect(cx - 2, cy - 13 + breathY, 4, 3, skin);
+    } else if (hairStyleId === 'style_4') {
+      // 마도 전투후드 (얼굴감싸기)
+      putRect(cx - 3, cy - 15 + breathY, 6, 5, '#8e44ad');
+      putRect(cx - 2, cy - 14 + breathY, 4, 4, skin);
+      put(cx, cy - 15 + breathY, '#f1c40f'); // 이마 위 보석
+    } else {
+      // 클래식 단발 (기본형)
+      putRect(cx - 3, cy - 15 + breathY, 6, 5, hair);
+      putRect(cx - 2, cy - 14 + breathY, 4, 4, skin);
+      if (state.gender === 'female') {
+        putRect(cx - 4, cy - 12 + breathY, 1, 5, hair);
+        putRect(cx + 3, cy - 12 + breathY, 1, 5, hair);
+      } else {
+        put(cx - 2, cy - 15 + breathY, hair);
+        put(cx + 1, cy - 15 + breathY, hair);
+      }
+    }
+
+    put(cx - 1, cy - 13 + breathY, eye);
+    put(cx + 1, cy - 13 + breathY, eye);
+    put(cx, cy - 11 + breathY, '#e2a38c');
+
+    putRect(cx - 5, cy - 9 + breathY, 1, 5, bodyColor);
+    put(cx - 5, cy - 4 + breathY, skin);
+    putRect(cx + 4, cy - 9 + breathY, 1, 5, bodyColor);
+    put(cx + 4, cy - 4 + breathY, skin);
+
+  // ============================================================
+  // LEVEL 30~100: HI-RES 32-BIT & MASTERPIECE STYLE
+  // ============================================================
+  } else {
+    putRect(cx - 3, cy - 3, 2, 4, legColor);
+    putRect(cx + 1, cy - 3, 2, 4, legColor);
+    putRect(cx - 3, cy - 3, 1, 2, '#3d566e');
+    putRect(cx + 1, cy - 3, 1, 2, '#3d566e');
+    putRect(cx - 4, cy - 1, 2, 2, footColor);
+    putRect(cx + 2, cy - 1, 2, 2, footColor);
+    putRect(cx - 3, cy - 1, 1, 1, '#2c3e50');
+
+    putRect(cx - 4, cy - 11 + breathY, 8, 9, bodyColor);
+    putRect(cx - 4, cy - 5 + breathY, 8, 1, '#111');
+    putRect(cx - 3, cy - 11 + breathY, 2, 8, '#5d6d7e');
+    putRect(cx + 1, cy - 11 + breathY, 2, 8, '#34495e'); 
+
+    putRect(cx - 5, cy - 11 + breathY, 1, 7, 'var(--crimson)');
+    putRect(cx + 4, cy - 11 + breathY, 1, 7, 'var(--crimson)');
+
+    // 32비트 고해상도 분기별 헤어스타일 드로잉
+    if (hairStyleId === 'style_2') {
+      putRect(cx - 3, cy - 15 + breathY, 6, 5, hair);
+      putRect(cx - 2, cy - 14 + breathY, 4, 4, skin);
+      // 입체적인 삐죽 스타일 추가
+      put(cx - 3, cy - 16 + breathY, hair);
+      put(cx - 1, cy - 16 + breathY, hair);
+      put(cx + 1, cy - 16 + breathY, hair);
+      put(cx + 3, cy - 16 + breathY, hair);
+    } else if (hairStyleId === 'style_3') {
+      putRect(cx - 3, cy - 15 + breathY, 6, 5, hair);
+      putRect(cx - 2, cy - 14 + breathY, 4, 4, skin);
+      // 아래로 향하는 정밀한 트윈테일 락 드로잉
+      putRect(cx - 4, cy - 13 + breathY, 1, 6, hair);
+      putRect(cx + 3, cy - 13 + breathY, 1, 6, hair);
+      put(cx - 5, cy - 8 + breathY, '#d4a017'); // 묶은 리본
+      put(cx + 4, cy - 8 + breathY, '#d4a017');
+    } else if (hairStyleId === 'style_4') {
+      // 마법사 전용 마법 전투 로브 후드 캡
+      putRect(cx - 4, cy - 16 + breathY, 8, 6, '#4a2306');
+      putRect(cx - 3, cy - 17 + breathY, 6, 1, '#4a2306');
+      putRect(cx - 2, cy - 18 + breathY, 4, 1, '#4a2306');
+      putRect(cx - 2, cy - 15 + breathY, 4, 5, skin);
+      put(cx, cy - 17 + breathY, 'var(--amber-light)'); // 신비의 영석
+    } else {
+      putRect(cx - 3, cy - 16 + breathY, 6, 6, hair);
+      putRect(cx - 2, cy - 15 + breathY, 4, 5, skin);
+      if (state.gender === 'female') {
+        putRect(cx - 4, cy - 13 + breathY, 1, 8, hair);
+        putRect(cx + 3, cy - 13 + breathY, 1, 8, hair);
+      } else {
+        putRect(cx - 3, cy - 16 + breathY, 6, 1, '#f1c40f');
+      }
+    }
+
+    put(cx - 1, cy - 13 + breathY, eye);
+    put(cx + 1, cy - 13 + breathY, eye);
+    put(cx, cy - 11 + breathY, '#ff7675');
+
+    putRect(cx - 5, cy - 10 + breathY, 1, 6, bodyColor);
+    put(cx - 5, cy - 4 + breathY, skin);
+    putRect(cx + 4, cy - 10 + breathY, 1, 6, bodyColor);
+    put(cx + 4, cy - 4 + breathY, skin);
+  }
+
+  // 10Lv 해금 악세사리
+  if (state.level >= 10) {
+    if (state.equippedAccessory === 'glasses') {
+      putRect(cx - 2, cy - 14 + breathY, 5, 1, '#000000');
+      put(cx - 1, cy - 13 + breathY, '#ffffff');
+      put(cx + 1, cy - 13 + breathY, '#ffffff');
+    } else if (state.equippedAccessory === 'eyepatch') {
+      putRect(cx - 2, cy - 14 + breathY, 5, 1, '#111');
+      putRect(cx - 1, cy - 13 + breathY, 1, 1, '#111');
+    } else if (state.equippedAccessory === 'crown') {
+      putRect(cx - 3, cy - 17 + breathY, 6, 1, '#f1c40f');
+      put(cx - 2, cy - 18 + breathY, '#f39c12');
+      put(cx, cy - 18 + breathY, '#f39c12');
+      put(cx + 2, cy - 18 + breathY, '#f39c12');
+    }
+  }
+
+  // 무기 드로잉
+  const weaponTheme = EQUIPMENT_RENDER_THEMES[state.equippedWeapon] || EQUIPMENT_RENDER_THEMES['w0'];
+  const weaponX = cx + 5;
+  const weaponY = cy - 8 + breathY;
+  const wSwing = Math.floor(Math.sin(tick * 0.08) * 0.6);
+
+  if (state.equippedWeapon === 'w4') {
+    ctx.fillStyle = 'rgba(255, 235, 150, 0.2)';
+    ctx.beginPath();
+    ctx.arc(weaponX * pw, (weaponY - 4 + wSwing) * ph, 8 * pw, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  putRect(weaponX, weaponY - weaponTheme.l + wSwing, 1, weaponTheme.l, weaponTheme.color);
+  putRect(weaponX - 1, weaponY - 2 + wSwing, 3, 1, '#5d4037');
+
+  // 방패/보조 무장
+  putRect(cx - 6, cy - 8 + breathY, 2, 4, trimColor);
+  if (state.equippedArmor !== 'a0') {
+    putRect(cx - 6, cy - 8 + breathY, 2, 4, 'var(--border-medieval-glow)');
+  }
+
+  // 40Lv 해금: 펫 렌더링
+  if (state.level >= 40 && state.equippedPet !== 'none') {
+    const petX = cx - 7;
+    const petY = cy - 13 + Math.floor(Math.sin(tick * 0.1) * 2.0);
+
+    if (state.equippedPet === 'slime') {
+      putRect(petX, petY, 3, 2, '#3498db');
+      put(petX + 1, petY - 1, '#5dade2');
+    } else if (state.equippedPet === 'phoenix') {
+      putRect(petX, petY, 3, 3, '#e74c3c');
+      put(petX + 1, petY + 1, '#f1c40f');
+    } else if (state.equippedPet === 'baby_dragon') {
+      putRect(petX, petY, 4, 3, '#2ecc71');
+      put(petX + 1, petY - 1, '#e74c3c');
+    }
+  }
+}
+
+// ============================================================
+// ============================================================
+function launchParticles(type) {
+  const canvas = document.getElementById('particle-overlay');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  const palette = type === 'gold' 
+    ? ['#f1c40f', '#f39c12', '#f5b041', '#fff'] 
+    : ['#2ecc71', '#3498db', '#9b59b6', '#e74c3c', '#f1c40f'];
+
+  for (let i = 0; i < 70; i++) {
+    particles.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2 + 50,
+      vx: (Math.random() - 0.5) * 16,
+      vy: (Math.random() - 0.5) * 16 - 5,
+      size: Math.random() * 8 + 4,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      alpha: 1.0,
+      decay: Math.random() * 0.015 + 0.015
+    });
+  }
+
+  if (particleTimer) cancelAnimationFrame(particleTimer);
+
+  function step() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    let anyAlive = false;
+
+    particles.forEach(p => {
+      if (p.alpha <= 0) return;
+      anyAlive = true;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.35;
+      p.alpha -= p.decay;
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    if (anyAlive) {
+      particleTimer = requestAnimationFrame(step);
+    } else {
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+    }
+  }
+  step();
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============================================================
+// ============================================================
+function gameLoop() {
+  frameTick++;
+  drawTown();
+  requestAnimationFrame(gameLoop);
+}
+
+// 자정 시간 초기화 감지 백그라운드 스레드 가동
+setInterval(() => {
+  dailyResetCheck();
+}, 60000);
+
+// 페이지 로드 시 도트 SVG 프레임들 자동 조립 렌더링
+function renderDotSystemAssets() {
+  // HUD 골드 아이콘
+  document.getElementById('purse-hud-area').insertAdjacentHTML('afterbegin', PIXEL_SVGS.coin);
+
+  // 플로팅 사이드바 제어 버튼 (계정, 가방, 옷장)
+  const sidebar = document.getElementById('floating-sidebar-area');
+  sidebar.innerHTML = `
+    <button class="plaza-btn" onclick="openWindow('win-accounts')" title="용사 계정 관리">${PIXEL_SVGS.account}</button>
+    <button class="plaza-btn" onclick="openWindow('win-inventory')" title="인벤토리">${PIXEL_SVGS.bag}</button>
+    <button class="plaza-btn" onclick="openWindow('win-closet')" title="옷장 (아바타 변경)">${PIXEL_SVGS.closet}</button>
+  `;
+
+  // 업적 훈장 트로피 아이콘
+  document.getElementById('trophy-icon-area').innerHTML = PIXEL_SVGS.trophy;
+
+  // 헤더 타이틀 내 도트 삽입
+  document.getElementById('win-title-quest').insertAdjacentHTML('afterbegin', PIXEL_SVGS.scroll + '&nbsp;&nbsp;');
+  document.getElementById('win-title-shop').insertAdjacentHTML('afterbegin', PIXEL_SVGS.chest + '&nbsp;&nbsp;');
+  document.getElementById('win-title-bag').insertAdjacentHTML('afterbegin', PIXEL_SVGS.medal + '&nbsp;&nbsp;');
+
+  // 하단 3개 네비게이션 버튼을 완벽한 픽셀 SVG로 동적 바인딩
+  const footerNav = document.getElementById('bottom-menu-bar');
+  footerNav.innerHTML = `
+    <button class="nav-button" id="btn-nav-quest" onclick="openWindow('win-quest')">
+      ${PIXEL_SVGS.scroll}
+      <span>의뢰 게시판</span>
+    </button>
+    <button class="nav-button" id="btn-nav-shop" onclick="openWindow('win-shop')">
+      ${PIXEL_SVGS.chest}
+      <span>상점 가기</span>
+    </button>
+    <button class="nav-button" id="btn-nav-bag" onclick="openWindow('win-bag')">
+      ${PIXEL_SVGS.medal}
+      <span>모험 인장</span>
+    </button>
+  `;
+}
+
+// PWA 서비스 워커 안전 등록 스크립트
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // 안전한 HTTP/HTTPS 프로토콜 환경에서만 서비스 워커 등록 작동 보증
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(reg => console.log('Life RPG PWA Service Worker Registered!', reg))
+        .catch(err => console.error('PWA Service Worker Registration Failed..', err));
+    } else {
+      console.log('가상 환경 또는 Local Blob 샌드박스로 감지되어 서비스 워커 등록을 스킵합니다. (프로토콜: ' + window.location.protocol + ')');
+    }
+  });
+}
+
+window.onload = function() {
+  loadState();
+  renderDotSystemAssets();
+  dailyResetCheck();
+  initCreatorScreen();
+  updateHUD();
+  
+  window.addEventListener('resize', () => {
+    drawTown();
+  });
+
+  gameLoop();
+};
+</script>
+
+</body>
+</html>
